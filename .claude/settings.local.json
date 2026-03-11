@@ -58,7 +58,14 @@
       "Bash(grep -n \"execute\" /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/node_modules/.pnpm/@mastra+core*/node_modules/@mastra/core/dist/tools/index.d.ts | head -10)",
       "Bash(grep -n \"execute\" /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/node_modules/.pnpm/@mastra+core@1.10.0*/node_modules/@mastra/core/dist/tools/types.d.ts | head -10)",
       "Bash(grep -B 5 -A 20 \"toAISdkStream\\\\|tool-call\\\\|tool-result\\\\|TOOL_CALL_START\\\\|TOOL_RESULT\" /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/node_modules/.pnpm/@mastra+ai-sdk*/node_modules/@mastra/ai-sdk/dist/index.js | grep -A 5 \"tool\" | head -50)",
-      "WebFetch(domain:assistant-ui.com)"
+      "WebFetch(domain:assistant-ui.com)",
+      "Bash(pnpm --filter @workspace/db add drizzle-orm postgres && pnpm --filter @workspace/db add -D drizzle-kit 2>&1 | tail -15)",
+      "Bash(pnpm --filter @workspace/db add -D @types/node 2>&1 | tail -5)",
+      "Bash(grep -A 20 \"Input\" /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/node_modules/.pnpm/@json-render+shadcn@0.12.0*/node_modules/@json-render/shadcn/dist/catalog.d.ts | head -30)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
 }

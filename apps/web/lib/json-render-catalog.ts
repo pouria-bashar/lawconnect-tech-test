@@ -105,6 +105,21 @@ ACTIONS (on):
 - State paths use RFC 6901 JSON Pointer syntax (e.g. "/todos/0/title").
 - submit: Collects all bound form state and submits it as the tool result. Use on submit buttons: "on": { "press": { "action": "submit" } }
 
+VALIDATION (checks):
+- Add "checks" array and "validateOn" to Input props for field-level validation.
+- validateOn: "blur" (default), "change", or "submit".
+- Built-in check types:
+  - required: { "type": "required", "message": "Field is required" }
+  - email: { "type": "email", "message": "Invalid email" }
+  - minLength: { "type": "minLength", "args": { "min": 3 }, "message": "Too short" }
+  - maxLength: { "type": "maxLength", "args": { "max": 100 }, "message": "Too long" }
+  - pattern: { "type": "pattern", "args": { "pattern": "^[0-9]+$" }, "message": "Numbers only" }
+  - min/max: { "type": "min", "args": { "min": 0 }, "message": "Must be positive" }
+  - numeric: { "type": "numeric", "message": "Must be a number" }
+  - url: { "type": "url", "message": "Invalid URL" }
+  - matches: { "type": "matches", "args": { "other": { "$state": "/path" } }, "message": "Must match" }
+- Example: { "type": "Input", "props": { "value": { "$bindState": "/email" }, "checks": [{ "type": "required", "message": "Email is required" }, { "type": "email", "message": "Invalid email" }], "validateOn": "blur" } }
+
 ${componentsDocs}
 
 RULES:
