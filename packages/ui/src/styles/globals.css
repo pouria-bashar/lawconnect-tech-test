@@ -126,3 +126,124 @@
     @apply bg-background text-foreground;
     }
 }
+
+/* Tiptap editor styles */
+.tiptap {
+  & > * + * {
+    margin-top: 0.75em;
+  }
+
+  p {
+    @apply my-3 first:mt-0 last:mb-0 text-base leading-relaxed;
+  }
+
+  h1 {
+    @apply text-3xl font-bold mt-8 mb-4 first:mt-0;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold mt-6 mb-3 first:mt-0;
+  }
+
+  h3 {
+    @apply text-xl font-semibold mt-5 mb-2 first:mt-0;
+  }
+
+  h4 {
+    @apply text-lg font-medium mt-4 mb-2 first:mt-0;
+  }
+
+  ul {
+    @apply list-disc pl-6 my-3;
+  }
+
+  ol {
+    @apply list-decimal pl-6 my-3;
+  }
+
+  li {
+    @apply my-1;
+
+    p {
+      @apply my-1;
+    }
+  }
+
+  blockquote {
+    @apply border-l-4 border-border pl-4 my-4 italic text-muted-foreground;
+  }
+
+  code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+
+  pre {
+    @apply bg-muted rounded-lg p-4 my-4 overflow-x-auto;
+
+    code {
+      @apply bg-transparent p-0 rounded-none text-sm;
+    }
+  }
+
+  hr {
+    @apply border-border my-6;
+  }
+
+  a {
+    @apply text-primary underline underline-offset-2 hover:text-primary/80;
+  }
+
+  img {
+    @apply rounded-lg max-w-full h-auto my-4;
+  }
+
+  mark {
+    @apply bg-yellow-200 dark:bg-yellow-800 rounded-sm px-0.5;
+  }
+
+  sub {
+    @apply text-xs;
+  }
+
+  sup {
+    @apply text-xs;
+  }
+
+  /* Task list */
+  ul[data-type="taskList"] {
+    @apply list-none pl-0 my-3;
+
+    li {
+      @apply flex items-start gap-2 my-1;
+
+      > label {
+        @apply mt-0.5;
+      }
+
+      > div {
+        @apply flex-1;
+      }
+    }
+  }
+
+  /* Text alignment */
+  .text-left { text-align: left; }
+  .text-center { text-align: center; }
+  .text-right { text-align: right; }
+  .text-justify { text-align: justify; }
+
+  /* YouTube embeds */
+  div[data-youtube-video] {
+    @apply my-4;
+
+    iframe {
+      @apply rounded-lg w-full aspect-video;
+    }
+  }
+
+  /* Placeholder */
+  p.is-editor-empty:first-child::before {
+    @apply text-muted-foreground float-left h-0 pointer-events-none;
+    content: attr(data-placeholder);
+  }
+}

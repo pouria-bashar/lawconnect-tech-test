@@ -65,7 +65,10 @@
       "Bash(find /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/apps/web/components/assistant-ui -type f | xargs -I {} basename {})",
       "mcp__supabase__get_project_url",
       "mcp__supabase__get_publishable_keys",
-      "mcp__supabase__execute_sql"
+      "mcp__supabase__execute_sql",
+      "Bash(cd /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test && pnpm --filter web typecheck 2>&1 | tail -30)",
+      "Bash(pnpm --filter web typecheck 2>&1 | grep \"error TS\" | grep -v \"generate-ui\")",
+      "Bash(pnpm --filter web typecheck 2>&1 | grep \"error\")"
     ]
   },
   "enableAllProjectMcpServers": true,

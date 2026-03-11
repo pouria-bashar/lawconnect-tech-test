@@ -32,14 +32,27 @@ import {
   RefreshCwIcon,
   SquareIcon,
 } from "lucide-react";
-import type { FC } from "react";
+import type { FC, ReactNode } from "react";
 
-export const Thread: FC = () => {
+export type Suggestion = {
+  prompt: string;
+  title: string;
+  description: string;
+};
+
+export type ThreadConfig = {
+  maxWidth?: string;
+  welcome: ReactNode;
+  suggestions: Suggestion[];
+  composerPlaceholder?: string;
+};
+
+export const Thread: FC<{ config: ThreadConfig }> = ({ config }) => {
   return (
     <ThreadPrimitive.Root
       className="aui-root aui-thread-root @container flex h-full flex-col bg-background"
       style={{
-        ["--thread-max-width" as string]: "44rem",
+        ["--thread-max-width" as string]: config.maxWidth ?? "44rem",
       }}
     >
       <ThreadPrimitive.Viewport
@@ -47,7 +60,10 @@ export const Thread: FC = () => {
         className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll scroll-smooth px-4 pt-4"
       >
         <AuiIf condition={(s) => s.thread.isEmpty}>
-          <ThreadWelcome />
+          <ThreadWelcome
+            welcome={config.welcome}
+            suggestions={config.suggestions}
+          />
         </AuiIf>
 
         <ThreadPrimitive.Messages
@@ -60,7 +76,7 @@ export const Thread: FC = () => {
 
         <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-6">
           <ThreadScrollToBottom />
-          <Composer />
+          <Composer placeholder={config.composerPlaceholder} />
         </ThreadPrimitive.ViewportFooter>
       </ThreadPrimitive.Viewport>
     </ThreadPrimitive.Root>
@@ -81,48 +97,30 @@ const ThreadScrollToBottom: FC = () => {
   );
 };
 
-const ThreadWelcome: FC = () => {
+const ThreadWelcome: FC<{
+  welcome: ReactNode;
+  suggestions: Suggestion[];
+}> = ({ welcome, suggestions }) => {
   return (
     <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-(--thread-max-width) grow flex-col">
       <div className="aui-thread-welcome-center flex w-full grow flex-col items-center justify-center">
         <div className="aui-thread-welcome-message flex size-full flex-col justify-center px-4">
-          <h1 className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both font-bold text-2xl tracking-tight duration-200">
-            <span className="text-emerald-600">Law</span><span>Network</span>
-          </h1>
-          <p className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-muted-foreground text-xl delay-75 duration-200">
-            Tell me what legal help you need and I'll guide you through the process.
-          </p>
+          {welcome}
         </div>
       </div>
-      <ThreadSuggestions />
+      <ThreadSuggestions suggestions={suggestions} />
     </div>
   );
 };
 
-const LEGAL_SUGGESTIONS = [
-  {
-    prompt: "I need help with a family law matter",
-    title: "Family Law",
-    description: "Divorce, custody, parenting, financial settlement",
-  },
-  {
-    prompt: "I need help with an immigration matter",
-    title: "Immigration Law",
-    description: "Visas, citizenship, deportation, sponsorship",
-  },
-  {
-    prompt: "I need help with a property matter",
-    title: "Property Law",
-    description: "Buying, selling, leases, disputes",
-  },
-];
-
-const ThreadSuggestions: FC = () => {
+const ThreadSuggestions: FC<{ suggestions: Suggestion[] }> = ({
+  suggestions,
+}) => {
   const threadRuntime = useThreadRuntime();
 
   return (
     <div className="aui-thread-welcome-suggestions grid w-full @md:grid-cols-2 gap-2 pb-4">
-      {LEGAL_SUGGESTIONS.map((s) => (
+      {suggestions.map((s) => (
         <div
           key={s.title}
           className="aui-thread-welcome-suggestion-display fade-in slide-in-from-bottom-2 animate-in fill-mode-both duration-200"
@@ -150,13 +148,13 @@ const ThreadSuggestions: FC = () => {
   );
 };
 
-const Composer: FC = () => {
+const Composer: FC<{ placeholder?: string }> = ({ placeholder }) => {
   return (
     <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col">
       <ComposerPrimitive.AttachmentDropzone className="aui-composer-attachment-dropzone flex w-full flex-col rounded-2xl border border-input bg-background px-1 pt-2 outline-none transition-shadow has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-ring/20 data-[dragging=true]:border-ring data-[dragging=true]:border-dashed data-[dragging=true]:bg-accent/50">
         <ComposerAttachments />
         <ComposerPrimitive.Input
-          placeholder="Describe your legal issue..."
+          placeholder={placeholder ?? "Type a message..."}
           className="aui-composer-input mb-1 max-h-32 min-h-14 w-full resize-none bg-transparent px-4 pt-2 pb-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-0"
           rows={1}
           autoFocus
