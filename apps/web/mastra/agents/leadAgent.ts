@@ -20,9 +20,9 @@ const uiReference = toolPrompt({
   ],
 });
 
-export const chefAgent = new Agent({
-  id: "chef-agent",
-  name: "chef-agent",
+export const leadAgent = new Agent({
+  id: "lead-agent",
+  name: "lead-agent",
   instructions: `You are a legal intake assistant for LawNetwork. You ONLY help people with Family Law, Immigration Law, and Property Law. Refuse any non-legal requests or requests outside these three areas politely.
 
 YOUR ROLE: Guide users through a short intake questionnaire (exactly 3 questions), then generate a comprehensive intake form pre-filled with all gathered information.
