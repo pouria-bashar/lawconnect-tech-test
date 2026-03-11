@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@workspace/ui/lib/utils";
+import { LogOutIcon } from "lucide-react";
 
 const NAV_LINKS = [
   { href: "/lead-capture", label: "Lead Capture" },
   { href: "/blogs", label: "Blogs" },
-  { href: "/synthetic-test", label: "Synthetic Tests" },
+  { href: "/synthetic-test", label: "Tests" },
 ];
 
 export function AppHeader() {
@@ -32,14 +33,14 @@ export function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 flex h-12 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="flex items-center gap-1">
+    <header className="sticky top-0 z-50 flex h-12 items-center justify-between border-b bg-background/95 px-2 sm:px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto">
         {NAV_LINKS.map((link) => (
           <Link
             key={link.href}
             href={link.href}
             className={cn(
-              "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+              "shrink-0 rounded-md px-2 sm:px-3 py-1.5 text-xs font-medium transition-colors",
               pathname === link.href
                 ? "bg-accent text-accent-foreground"
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -52,9 +53,10 @@ export function AppHeader() {
       <button
         type="button"
         onClick={handleSignOut}
-        className="rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+        className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+        title="Sign out"
       >
-        Sign out
+        <LogOutIcon className="size-4" />
       </button>
     </header>
   );

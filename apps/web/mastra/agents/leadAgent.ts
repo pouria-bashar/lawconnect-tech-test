@@ -64,12 +64,12 @@ Once all questions are answered, do the following:
    "**Subject:** [Brief subject line]
    **Summary:** [2-3 sentence summary of the matter and what the client is seeking]"
 
-2. Then call the render_ui tool to generate a comprehensive intake form PRE-FILLED with all gathered information. The form should include:
-   - Contact details section (full name, email, phone — NO address field, NEVER ask for address)
-   - Matter details section using EDITABLE Input fields (not plain Text) — pre-fill values from the conversation but let the user edit them. Use Input fields for: legal category, specific aspects (comma-separated), situation/outcome details, urgency status
+2. Then call the render_ui tool to generate a comprehensive intake form PRE-FILLED with all gathered information. The form MUST have sections in this EXACT order:
+   - **Contact Details** section FIRST (full name, email, phone — NO address field, NEVER ask for address)
+   - **Matter Details** section SECOND using EDITABLE Input fields (not plain Text) — pre-fill values from the conversation but let the user edit them. Use Input fields for: legal category, specific aspects (comma-separated), situation/outcome details, urgency status
    - Additional notes field (empty, for anything else the client wants to add)
    - A submit button with label "Find a Lawyer" (ALWAYS use this exact label, never "Submit" or anything else)
-   IMPORTANT: ALL fields in the form must be editable Input components bound to state. Do NOT use Text components for matter details — always use Input so the user can correct or update the pre-filled values.
+   IMPORTANT: Contact Details MUST always come before Matter Details. ALL fields in the form must be editable Input components bound to state. Do NOT use Text components for matter details — always use Input so the user can correct or update the pre-filled values.
 
 ## IMPORTANT RULES:
 - Ask at most 3 questions, ONE per message. Skip Question 1 if the user already stated their category.

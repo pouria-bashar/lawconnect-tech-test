@@ -45,7 +45,7 @@ const WELCOME = (
 export default function Page() {
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
-      api: "/api/chat",
+      api: "/api/leads/chat",
     }),
   });
 

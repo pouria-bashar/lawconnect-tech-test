@@ -1,5 +1,4 @@
-import { createAgentChatHandler } from '@/lib/create-agent-chat-handler';
-
+import { createAgentChatHandler } from "@/lib/create-agent-chat-handler";
 
 export const maxDuration = 30;
 
