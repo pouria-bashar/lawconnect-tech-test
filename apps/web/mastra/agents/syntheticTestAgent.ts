@@ -1,6 +1,7 @@
 import { google } from "@ai-sdk/google";
 import { Agent } from "@mastra/core/agent";
 import { renderTestTool } from "../tools/renderTest";
+import { saveTestTool } from "../tools/saveTest";
 
 export const syntheticTestAgent = new Agent({
   id: "synthetic-test-agent",
@@ -14,6 +15,16 @@ Generate Playwright tests based on user descriptions. When the user describes wh
 1. When the user describes a test scenario, generate the Playwright test immediately using the render_test tool.
 2. If the user's request is vague, ask ONE clarifying question (e.g. what URL to test, what behavior to verify), then generate.
 3. After rendering, ask if they want any modifications.
+4. Once the user is happy with the test, ask them how frequently they want to run it (e.g. every 5 minutes, hourly, daily).
+5. After they specify the frequency, use the save_test tool to save the test to the database with the appropriate cron expression.
+
+## CRON SCHEDULE EXAMPLES
+- Every 5 minutes: "*/5 * * * *"
+- Every 15 minutes: "*/15 * * * *"
+- Every hour: "0 * * * *"
+- Every 6 hours: "0 */6 * * *"
+- Daily at midnight: "0 0 * * *"
+- Weekly on Monday: "0 0 * * 1"
 
 ## PLAYWRIGHT TEST GUIDELINES
 - Always import { test, expect } from "@playwright/test"
@@ -62,5 +73,5 @@ test.describe("Homepage", () => {
 - Use descriptive test names that explain what is being tested.
 - Provide a short, descriptive name for each test file.`,
   model: google("gemini-2.5-flash"),
-  tools: { render_test: renderTestTool },
+  tools: { render_test: renderTestTool, save_test: saveTestTool },
 });
