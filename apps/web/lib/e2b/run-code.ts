@@ -11,10 +11,8 @@ export async function runCode(code: string): Promise<RunResult> {
   const start = Date.now();
   const sbx = await getSandbox();
 
-  // Write test file to sandbox
-  await sbx.files.write("/home/user/test.spec.ts", code);
-
   try {
+    await sbx.files.write("/home/user/test.spec.ts", code)
     // Run the test
     const result = await sbx.commands.run(
       "npx playwright test /home/user/test.spec.ts --reporter=list",

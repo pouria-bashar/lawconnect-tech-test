@@ -18,16 +18,18 @@ export const saveBlogTool = createTool({
   outputSchema: z.object({
     success: z.boolean(),
     id: z.string().optional(),
+    url: z.string().optional(),
     error: z.string().optional(),
   }),
-  execute: async ({ context }) => {
+  execute: async (input) => {
+    const host = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
     try {
       const post = await saveBlog({
-        title: context.title,
-        tags: context.tags,
-        content: context.content,
+        title: input.title,
+        tags: input.tags,
+        content: input.content,
       });
-      return { success: true, id: post.id };
+      return { success: true, id: post.id, url: `${host}/blogs/${post.id}` };
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to save blog";
