@@ -1,4 +1,3 @@
-import { google } from "@ai-sdk/google";
 import { Agent } from "@mastra/core/agent";
 import { renderBlogTool } from "../tools/renderBlog";
 import { saveBlogTool } from "../tools/saveBlog";
@@ -135,6 +134,9 @@ You MUST use the render_blog tool to display content. The content field must be 
 - Use blockquotes for notable quotes or callouts.
 - Use highlight marks to emphasize key phrases.
 - Use task lists for actionable items or checklists.`,
-  model: google("gemini-2.5-flash"),
+  model: ({ requestContext }) => {
+    const modelId = requestContext?.get("model-id") as string | undefined;
+    return modelId ?? "google/gemini-2.5-flash";
+  },
   tools: { render_blog: renderBlogTool, save_blog: saveBlogTool, ask_question: askQuestionTool },
 });

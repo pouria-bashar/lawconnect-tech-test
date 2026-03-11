@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import {
   useChatRuntime,
@@ -43,9 +44,12 @@ const WELCOME = (
 );
 
 export default function Page() {
+  const [selectedModel, setSelectedModel] = useState("google/gemini-2.5-flash");
+
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: "/api/leads/chat",
+      body: { modelId: selectedModel },
     }),
   });
 
@@ -60,6 +64,8 @@ export default function Page() {
             welcome: WELCOME,
             suggestions: LEGAL_SUGGESTIONS,
             composerPlaceholder: "Describe your legal issue...",
+            selectedModel,
+            onModelChange: setSelectedModel,
           }}
         />
       </div>

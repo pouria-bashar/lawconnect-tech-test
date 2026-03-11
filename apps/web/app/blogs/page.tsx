@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import {
   useChatRuntime,
@@ -42,9 +43,12 @@ const WELCOME = (
 );
 
 export default function BlogsPage() {
+  const [selectedModel, setSelectedModel] = useState("google/gemini-2.5-flash");
+
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: "/api/blogs/chat",
+      body: { modelId: selectedModel },
     }),
   });
 
@@ -59,6 +63,8 @@ export default function BlogsPage() {
             welcome: WELCOME,
             suggestions: BLOG_SUGGESTIONS,
             composerPlaceholder: "Describe the blog post you want to create...",
+            selectedModel,
+            onModelChange: setSelectedModel,
           }}
         />
       </div>

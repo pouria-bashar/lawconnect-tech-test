@@ -1,6 +1,4 @@
 import {
-  ComposerAddAttachment,
-  ComposerAttachments,
   UserMessageAttachments,
 } from "@/components/assistant-ui/attachment";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
@@ -40,11 +38,22 @@ export type Suggestion = {
   description: string;
 };
 
+const MODEL_OPTIONS = [
+  { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
+  { value: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
+  { value: "google/gemini-2.0-flash", label: "Gemini 2.0 Flash" },
+  { value: "openai/gpt-4o", label: "GPT-4o" },
+  { value: "openai/gpt-4o-mini", label: "GPT-4o Mini" },
+  { value: "anthropic/claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
+] as const;
+
 export type ThreadConfig = {
   maxWidth?: string;
   welcome: ReactNode;
   suggestions: Suggestion[];
   composerPlaceholder?: string;
+  selectedModel?: string;
+  onModelChange?: (model: string) => void;
 };
 
 export const Thread: FC<{ config: ThreadConfig }> = ({ config }) => {
@@ -76,7 +85,11 @@ export const Thread: FC<{ config: ThreadConfig }> = ({ config }) => {
 
         <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-4 md:pb-6">
           <ThreadScrollToBottom />
-          <Composer placeholder={config.composerPlaceholder} />
+          <Composer
+            placeholder={config.composerPlaceholder}
+            selectedModel={config.selectedModel}
+            onModelChange={config.onModelChange}
+          />
         </ThreadPrimitive.ViewportFooter>
       </ThreadPrimitive.Viewport>
     </ThreadPrimitive.Root>
@@ -148,28 +161,50 @@ const ThreadSuggestions: FC<{ suggestions: Suggestion[] }> = ({
   );
 };
 
-const Composer: FC<{ placeholder?: string }> = ({ placeholder }) => {
+const Composer: FC<{
+  placeholder?: string;
+  selectedModel?: string;
+  onModelChange?: (model: string) => void;
+}> = ({ placeholder, selectedModel, onModelChange }) => {
   return (
-    <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col">
-      <ComposerPrimitive.AttachmentDropzone className="aui-composer-attachment-dropzone flex w-full flex-col rounded-2xl border border-input bg-background px-1 pt-2 outline-none transition-shadow has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-ring/20 data-[dragging=true]:border-ring data-[dragging=true]:border-dashed data-[dragging=true]:bg-accent/50">
-        <ComposerAttachments />
-        <ComposerPrimitive.Input
-          placeholder={placeholder ?? "Type a message..."}
-          className="aui-composer-input mb-1 max-h-32 min-h-14 w-full resize-none bg-transparent px-4 pt-2 pb-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-0"
-          rows={1}
-          autoFocus
-          aria-label="Message input"
-        />
-        <ComposerAction />
-      </ComposerPrimitive.AttachmentDropzone>
+    <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-2xl border border-input bg-background px-1 pt-2 outline-none transition-shadow has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-ring/20">
+      <ComposerPrimitive.Input
+        placeholder={placeholder ?? "Type a message..."}
+        className="aui-composer-input mb-1 max-h-32 min-h-14 w-full resize-none bg-transparent px-4 pt-2 pb-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-0"
+        rows={1}
+        autoFocus
+        aria-label="Message input"
+      />
+      <ComposerAction
+        selectedModel={selectedModel}
+        onModelChange={onModelChange}
+      />
     </ComposerPrimitive.Root>
   );
 };
 
-const ComposerAction: FC = () => {
+const ComposerAction: FC<{
+  selectedModel?: string;
+  onModelChange?: (model: string) => void;
+}> = ({ selectedModel, onModelChange }) => {
   return (
     <div className="aui-composer-action-wrapper relative mx-2 mb-2 flex items-center justify-between">
-      <ComposerAddAttachment />
+      <div className="flex items-center gap-1">
+        {onModelChange && (
+          <select
+            value={selectedModel ?? MODEL_OPTIONS[0].value}
+            onChange={(e) => onModelChange(e.target.value)}
+            className="h-8 rounded-md border-none bg-transparent px-2 text-xs text-muted-foreground outline-none hover:text-foreground focus:ring-0"
+            aria-label="Select model"
+          >
+            {MODEL_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
       <AuiIf condition={(s) => !s.thread.isRunning}>
         <ComposerPrimitive.Send asChild>
           <TooltipIconButton

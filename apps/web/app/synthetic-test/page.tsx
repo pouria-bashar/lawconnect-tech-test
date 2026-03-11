@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import {
   useChatRuntime,
@@ -44,9 +45,12 @@ const WELCOME = (
 );
 
 export default function SyntheticTestPage() {
+  const [selectedModel, setSelectedModel] = useState("google/gemini-2.5-flash");
+
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: "/api/synthetic-test/chat",
+      body: { modelId: selectedModel },
     }),
   });
 
@@ -61,6 +65,8 @@ export default function SyntheticTestPage() {
             suggestions: TEST_SUGGESTIONS,
             composerPlaceholder:
               "Describe the test you want to create...",
+            selectedModel,
+            onModelChange: setSelectedModel,
           }}
         />
       </div>

@@ -1,14 +1,20 @@
 import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
 import { toAISdkStream } from "@mastra/ai-sdk"
+import { RequestContext } from "@mastra/core/request-context";
 import { mastra } from "@/mastra";
 
 export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "syntheticTestAgent") {
   return async function POST(req: Request) {
-    const { messages } = await req.json();
+    const { messages, modelId } = await req.json();
 
     const agent = mastra.getAgent(agentName);
 
-    const stream = await agent.stream(messages);
+    const requestContext = new RequestContext();
+    if (modelId) {
+      requestContext.set("model-id", modelId);
+    }
+
+    const stream = await agent.stream(messages, { requestContext });
 
     const uiMessageStream = createUIMessageStream({
       originalMessages: messages,

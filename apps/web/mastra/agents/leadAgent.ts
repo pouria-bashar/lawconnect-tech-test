@@ -1,4 +1,3 @@
-import { google } from '@ai-sdk/google';
 import { Agent } from "@mastra/core/agent";
 import { toolPrompt } from "@/lib/json-render-catalog";
 import { renderUiTool } from "../tools/renderUi";
@@ -88,6 +87,9 @@ IMPORTANT SUBMIT BUTTON: Every form MUST have a Submit button that uses the "sub
 "on": { "press": { "action": "submit" } }
 
 ${uiReference}`,
-  model: google("gemini-2.5-flash"),
+  model: ({ requestContext }) => {
+    const modelId = requestContext?.get("model-id") as string | undefined;
+    return modelId ?? "google/gemini-2.5-flash";
+  },
   tools: { render_ui: renderUiTool, find_lawyer: findLawyerTool, ask_question: askQuestionTool },
 });
