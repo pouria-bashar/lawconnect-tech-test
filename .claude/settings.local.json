@@ -71,7 +71,10 @@
       "Bash(pnpm --filter web typecheck 2>&1 | grep \"error\")",
       "Bash(cat \"/Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/apps/web/app/\\(auth\\)/login/page.tsx\")",
       "Bash(cat \"/Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/apps/web/app/\\(auth\\)/signup/page.tsx\")",
-      "WebFetch(domain:orm.drizzle.team)"
+      "WebFetch(domain:orm.drizzle.team)",
+      "Bash(which supabase:*)",
+      "Bash(cd /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test && supabase init 2>&1)",
+      "Bash(cd /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/packages/db && npx drizzle-kit generate --name=initial-schema 2>&1)"
     ]
   },
   "enableAllProjectMcpServers": true,

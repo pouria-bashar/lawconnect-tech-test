@@ -205,6 +205,9 @@ importers:
         specifier: ^3.4.7
         version: 3.4.8
     devDependencies:
+      '@types/node':
+        specifier: ^25.1.0
+        version: 25.2.3
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
