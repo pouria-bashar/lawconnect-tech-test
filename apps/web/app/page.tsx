@@ -5,10 +5,10 @@ import {
   useChatRuntime,
   AssistantChatTransport,
 } from "@assistant-ui/react-ai-sdk";
-import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { Thread } from "@/components/assistant-ui/thread";
 import { JsonRenderToolUI } from "@/components/assistant-ui/json-render-tool";
 import { FindLawyerToolUI } from "@/components/assistant-ui/find-lawyer-tool";
+import { AskQuestionToolUI } from "@/components/assistant-ui/ask-question-tool";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -19,7 +19,6 @@ export default function Page() {
     transport: new AssistantChatTransport({
       api: "/api/chat",
     }),
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
 
   async function handleSignOut() {
@@ -33,6 +32,7 @@ export default function Page() {
     <AssistantRuntimeProvider runtime={runtime}>
       <JsonRenderToolUI />
       <FindLawyerToolUI />
+      <AskQuestionToolUI />
       <div className="relative h-dvh">
         <div className="absolute right-4 top-4 z-10">
           <button

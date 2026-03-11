@@ -87,10 +87,10 @@ const ThreadWelcome: FC = () => {
       <div className="aui-thread-welcome-center flex w-full grow flex-col items-center justify-center">
         <div className="aui-thread-welcome-message flex size-full flex-col justify-center px-4">
           <h1 className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both font-semibold text-2xl duration-200">
-            Legal Assistant
+            LawNetwork
           </h1>
           <p className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-muted-foreground text-xl delay-75 duration-200">
-            Describe your legal issue and I'll generate the right form for you.
+            Tell me what legal help you need and I'll guide you through the process.
           </p>
         </div>
       </div>
@@ -101,24 +101,19 @@ const ThreadWelcome: FC = () => {
 
 const LEGAL_SUGGESTIONS = [
   {
-    prompt: "My neighbour is damaging the shared driveway, can I make a complaint?",
-    title: "Neighbour dispute",
-    description: "Complaint about shared property damage",
+    prompt: "I need help with a family law matter",
+    title: "Family Law",
+    description: "Divorce, custody, parenting, financial settlement",
   },
   {
-    prompt: "My landlord hasn't returned my deposit after 3 months, what can I do?",
-    title: "Tenancy deposit",
-    description: "Demand letter for unreturned deposit",
+    prompt: "I need help with an immigration matter",
+    title: "Immigration Law",
+    description: "Visas, citizenship, deportation, sponsorship",
   },
   {
-    prompt: "I bought a faulty product online and the seller refuses a refund",
-    title: "Consumer complaint",
-    description: "Refund request for defective goods",
-  },
-  {
-    prompt: "My employer hasn't paid my overtime for the last 2 months",
-    title: "Employment issue",
-    description: "Formal complaint for unpaid wages",
+    prompt: "I need help with a property matter",
+    title: "Property Law",
+    description: "Buying, selling, leases, disputes",
   },
 ];
 
@@ -134,7 +129,7 @@ const ThreadSuggestions: FC = () => {
         >
           <Button
             variant="ghost"
-            className="aui-thread-welcome-suggestion h-auto w-full @md:flex-col flex-wrap items-start justify-start gap-1 rounded-2xl border px-4 py-3 text-left text-sm transition-colors hover:bg-muted"
+            className="aui-thread-welcome-suggestion h-auto w-full flex-col items-start justify-start gap-1 rounded-2xl border px-4 py-3 text-left text-sm whitespace-normal transition-colors hover:bg-muted"
             onClick={() => {
               threadRuntime.append({
                 role: "user",
@@ -145,7 +140,7 @@ const ThreadSuggestions: FC = () => {
             <span className="aui-thread-welcome-suggestion-text-1 font-medium">
               {s.title}
             </span>
-            <span className="aui-thread-welcome-suggestion-text-2 text-muted-foreground">
+            <span className="aui-thread-welcome-suggestion-text-2 line-clamp-1 text-muted-foreground">
               {s.description}
             </span>
           </Button>

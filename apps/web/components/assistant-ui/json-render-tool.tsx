@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { makeAssistantToolUI } from "@assistant-ui/react";
+import { makeAssistantToolUI, useThreadRuntime } from "@assistant-ui/react";
 import {
   Renderer,
   StateProvider,
@@ -165,6 +165,7 @@ export const JsonRenderToolUI = makeAssistantToolUI<
 >({
   toolName: "render_ui",
   render: ({ args, status, addResult }) => {
+    const runtime = useThreadRuntime();
     const spec = args as Spec | undefined;
     const loading = status.type === "running";
 
@@ -198,6 +199,13 @@ export const JsonRenderToolUI = makeAssistantToolUI<
 
     const handleSubmit = (formData: Record<string, unknown>) => {
       addResult({ success: true, formData });
+      // Append a user message to continue in a new turn (triggers find_lawyer)
+      setTimeout(() => {
+        runtime.append({
+          role: "user",
+          content: [{ type: "text", text: "I've submitted the intake form. Please find me a suitable lawyer." }],
+        });
+      }, 0);
     };
 
     return (

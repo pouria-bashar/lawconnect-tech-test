@@ -73,7 +73,7 @@ export default function SignupPage() {
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Create an account</h1>
           <p className="text-sm text-muted-foreground">
-            Sign up to start using LawConnect
+            Sign up to start using LawNetwork
           </p>
         </div>
 
