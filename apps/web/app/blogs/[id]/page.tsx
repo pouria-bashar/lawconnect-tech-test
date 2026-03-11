@@ -66,8 +66,8 @@ export default async function BlogPage({
             </time>
             {blog.tags.length > 0 && (
               <>
-                <span>&middot;</span>
-                <div className="flex gap-1.5 line-clamp-1">
+                
+                <div className="flex flex-wrap gap-1.5">
                   {blog.tags.map((tag) => (
                     <span
                       key={tag}

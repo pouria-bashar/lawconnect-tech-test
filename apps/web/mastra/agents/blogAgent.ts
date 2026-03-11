@@ -1,6 +1,8 @@
 import { google } from "@ai-sdk/google";
 import { Agent } from "@mastra/core/agent";
 import { renderBlogTool } from "../tools/renderBlog";
+import { saveBlogTool } from "../tools/saveBlog";
+import { askQuestionTool } from "../tools/askQuestion";
 
 export const blogAgent = new Agent({
   id: "blog-agent",
@@ -13,7 +15,9 @@ Help users brainstorm, outline, and generate full blog posts. When the user prov
 ## WORKFLOW
 1. When the user describes what they want to write about, generate the blog post immediately using the render_blog tool.
 2. If the user's request is vague, ask ONE clarifying question, then generate.
-3. After rendering, ask if they want any changes.
+3. After the blog is rendered, use the ask_question tool to ask the user if they want to save the blog with options: "Yes, save it" and "No, don't save".
+4. If the user chooses to save, use the save_blog tool with the same title, tags, and content from the render_blog call. Confirm to the user that the blog has been saved.
+5. If the user declines, acknowledge and ask if they want any changes.
 
 ## BLOG CONTENT GUIDELINES
 - Use clear, engaging headings (h2, h3)
@@ -132,5 +136,5 @@ You MUST use the render_blog tool to display content. The content field must be 
 - Use highlight marks to emphasize key phrases.
 - Use task lists for actionable items or checklists.`,
   model: google("gemini-2.5-flash"),
-  tools: { render_blog: renderBlogTool },
+  tools: { render_blog: renderBlogTool, save_blog: saveBlogTool, ask_question: askQuestionTool },
 });

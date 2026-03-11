@@ -1,12 +1,9 @@
 "use client";
 
 import { makeAssistantToolUI } from "@assistant-ui/react";
-import type { Editor, JSONContent } from "@tiptap/react";
-import { useEffect, useRef, useCallback } from "react";
-import { Button } from "@workspace/ui/components/button";
-import { SaveIcon, CheckIcon, LoaderIcon } from "lucide-react";
+import type { JSONContent } from "@tiptap/react";
+import { useEffect, useRef } from "react";
 import { TiptapEditor } from "@/components/tiptap-editor";
-import { useSaveBlog } from "@/hooks/use-save-blog";
 
 function useAutoCompleteToolResult(
   status: { type: string },
@@ -33,26 +30,6 @@ function TiptapBlogRenderer({
   content: JSONContent;
   loading: boolean;
 }) {
-  const editorRef = useRef<Editor | null>(null);
-  const { state: saveState, save, reset } = useSaveBlog();
-
-  const handleEditorReady = useCallback((editor: Editor) => {
-    editorRef.current = editor;
-  }, []);
-
-  const handleSave = useCallback(async () => {
-    if (!editorRef.current) return;
-    try {
-      await save({
-        title,
-        tags,
-        content: editorRef.current.getJSON(),
-      });
-    } catch {
-      // error state is handled by the hook
-    }
-  }, [title, tags, save]);
-
   return (
     <div className="my-4 w-full overflow-hidden rounded-xl border bg-background">
       <div className="border-b bg-muted/30 px-4 py-3">
@@ -70,7 +47,7 @@ function TiptapBlogRenderer({
           </div>
         )}
       </div>
-      <TiptapEditor content={content} onEditorReady={handleEditorReady} />
+      <TiptapEditor content={content} />
       {loading && (
         <div className="border-t px-4 py-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -79,29 +56,6 @@ function TiptapBlogRenderer({
           </div>
         </div>
       )}
-      <div className="flex justify-end border-t bg-muted/30 px-4 py-3">
-        <Button
-          variant={saveState === "success" ? "outline" : "default"}
-          size="sm"
-          className="h-8 gap-1.5 px-3 text-xs"
-          onClick={saveState === "success" || saveState === "error" ? reset : handleSave}
-          disabled={loading || saveState === "loading"}
-        >
-          {saveState === "loading" && (
-            <LoaderIcon className="size-3 animate-spin" />
-          )}
-          {saveState === "success" && (
-            <CheckIcon className="size-3 text-emerald-500" />
-          )}
-          {(saveState === "idle" || saveState === "error") && (
-            <SaveIcon className="size-3" />
-          )}
-          {saveState === "idle" && "Save"}
-          {saveState === "loading" && "Saving..."}
-          {saveState === "success" && "Saved"}
-          {saveState === "error" && "Failed — Retry"}
-        </Button>
-      </div>
     </div>
   );
 }

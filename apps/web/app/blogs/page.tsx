@@ -8,6 +8,7 @@ import {
 import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
 import { TiptapRenderToolUI } from "@/components/assistant-ui/tiptap-render-tool";
+import { AskQuestionToolUI } from "@/components/assistant-ui/ask-question-tool";
 
 const BLOG_SUGGESTIONS: Suggestion[] = [
   {
@@ -50,6 +51,7 @@ export default function BlogsPage() {
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <TiptapRenderToolUI />
+      <AskQuestionToolUI />
       <div className="relative h-[calc(100dvh-3rem)]">
         <Thread
           config={{
