@@ -45,6 +45,7 @@
     "@tiptap/pm": "^3.20.1",
     "@tiptap/react": "^3.20.1",
     "@tiptap/starter-kit": "^3.20.1",
+    "@workspace/db": "workspace:^",
     "@workspace/ui": "workspace:*",
     "ai": "^6.0.116",
     "e2b": "^2.14.1",

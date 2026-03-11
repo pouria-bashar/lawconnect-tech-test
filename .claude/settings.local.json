@@ -68,7 +68,10 @@
       "mcp__supabase__execute_sql",
       "Bash(cd /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test && pnpm --filter web typecheck 2>&1 | tail -30)",
       "Bash(pnpm --filter web typecheck 2>&1 | grep \"error TS\" | grep -v \"generate-ui\")",
-      "Bash(pnpm --filter web typecheck 2>&1 | grep \"error\")"
+      "Bash(pnpm --filter web typecheck 2>&1 | grep \"error\")",
+      "Bash(cat \"/Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/apps/web/app/\\(auth\\)/login/page.tsx\")",
+      "Bash(cat \"/Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/apps/web/app/\\(auth\\)/signup/page.tsx\")",
+      "WebFetch(domain:orm.drizzle.team)"
     ]
   },
   "enableAllProjectMcpServers": true,

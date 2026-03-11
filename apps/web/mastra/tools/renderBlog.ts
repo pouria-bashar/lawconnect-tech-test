@@ -24,6 +24,9 @@ export const renderBlogTool = createTool({
     "Render a blog post using Tiptap JSON format. Call this tool to display the generated blog content in a rich text editor. The content must follow Tiptap's JSONContent schema.",
   inputSchema: z.object({
     title: z.string().describe("The blog post title"),
+    tags: z
+      .array(z.string())
+      .describe("Relevant tags for the blog post (e.g. ['AI', 'healthcare', 'technology'])"),
     content: z
       .object({
         type: z.literal("doc"),
