@@ -1,5 +1,5 @@
 import { eq, desc } from "drizzle-orm";
-import { db } from "../index.js";
+import { db } from "../index";
 import {
   tests,
   testReports,
@@ -7,7 +7,7 @@ import {
   type SelectTest,
   type InsertTestReport,
   type SelectTestReport,
-} from "../schema/synthetic-test.js";
+} from "../schema/synthetic-test";
 
 // --- Tests ---
 

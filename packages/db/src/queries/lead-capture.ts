@@ -1,10 +1,10 @@
 import { eq, desc } from "drizzle-orm";
-import { db } from "../index.js";
+import { db } from "../index";
 import {
   leads,
   type InsertLead,
   type SelectLead,
-} from "../schema/lead-capture.js";
+} from "../schema/lead-capture";
 
 export async function saveLead(
   data: Omit<InsertLead, "id" | "createdAt" | "updatedAt">,

@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
-import { db } from "../index.js";
-import { posts, type InsertPost, type SelectPost } from "../schema/blog.js";
+import { db } from "../index";
+import { posts, type InsertPost, type SelectPost } from "../schema/blog";
 
 export async function saveBlog(
   data: Omit<InsertPost, "id" | "createdAt" | "updatedAt">,
