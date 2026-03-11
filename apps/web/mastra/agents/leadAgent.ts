@@ -15,7 +15,7 @@ const uiReference = toolPrompt({
     "Add a Submit button at the bottom.",
     "EVERY form MUST have a Brand component as the FIRST child of the root Card: { \"type\": \"Brand\", \"props\": {}, \"children\": [] }. Do NOT use an Image, logo, or Heading for branding — always use the Brand component. Do NOT set a 'title' prop on the root Card — use a separate Heading child element AFTER the Brand for the form title.",
     "PRE-FILLING IS CRITICAL: You MUST use the 'state' field to store every piece of information the user provided throughout the conversation. Bind every Input value to state using { \"$bindState\": \"/path\" }. Fields the user did NOT provide should be empty strings with a helpful placeholder.",
-    "VALIDATION IS REQUIRED: Add 'checks' to ALL Input fields with appropriate validators. Use 'required' for mandatory fields, 'email' for email fields, 'pattern' with date regex for date fields. Set 'validateOn' to 'blur' for all fields.",
+    "VALIDATION IS REQUIRED: Add 'checks' to ALL Input fields with appropriate validators. Use 'required' for mandatory fields, 'email' for email fields, 'pattern' with date regex for date fields. DO NOT ADD VALIDATION for phone numbers. Set 'validateOn' to 'blur' for all fields.",
     "NEVER use viewport height classes (min-h-screen, h-screen) — the UI renders inside a fixed-size container.",
   ],
 });

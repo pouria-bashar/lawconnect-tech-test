@@ -13,6 +13,7 @@ import {
   useActions,
 } from "@json-render/react";
 import { registry } from "@/lib/json-render";
+import { useSaveLead } from "@/hooks/use-save-lead";
 import type { Spec } from "@json-render/core";
 
 /**
@@ -166,6 +167,7 @@ export const JsonRenderToolUI = makeAssistantToolUI<
   toolName: "render_ui",
   render: ({ args, status, addResult }) => {
     const runtime = useThreadRuntime();
+    const { save: saveLead } = useSaveLead();
     const spec = args as Spec | undefined;
     const loading = status.type === "running";
 
@@ -197,8 +199,26 @@ export const JsonRenderToolUI = makeAssistantToolUI<
       );
     }
 
-    const handleSubmit = (formData: Record<string, unknown>) => {
-      addResult({ success: true, formData });
+    const handleSubmit = async (state: Record<string, unknown>) => {
+      addResult({ success: true, formData: state });
+
+      // The state store wraps fields under a "formData" key
+      const intake = (state.formData ?? state) as Record<string, unknown>;
+
+      // Save the lead to the database
+      try {
+        await saveLead({
+          name: (intake.fullName as string) ?? "",
+          email: (intake.email as string) ?? "",
+          phone: intake.phone as string | undefined,
+          legalArea: intake.legalCategory as string | undefined,
+          description: intake.situationDetails as string | undefined,
+          intakeData: intake,
+        });
+      } catch (error) {
+        console.error("Failed to save lead:", error);
+      }
+
       // Append a user message to continue in a new turn (triggers find_lawyer)
       setTimeout(() => {
         runtime.append({
