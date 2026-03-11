@@ -61,7 +61,11 @@
       "WebFetch(domain:assistant-ui.com)",
       "Bash(pnpm --filter @workspace/db add drizzle-orm postgres && pnpm --filter @workspace/db add -D drizzle-kit 2>&1 | tail -15)",
       "Bash(pnpm --filter @workspace/db add -D @types/node 2>&1 | tail -5)",
-      "Bash(grep -A 20 \"Input\" /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/node_modules/.pnpm/@json-render+shadcn@0.12.0*/node_modules/@json-render/shadcn/dist/catalog.d.ts | head -30)"
+      "Bash(grep -A 20 \"Input\" /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/node_modules/.pnpm/@json-render+shadcn@0.12.0*/node_modules/@json-render/shadcn/dist/catalog.d.ts | head -30)",
+      "Bash(find /Users/pouria/Documents/sustainbit/cloudflare-poc/my-test/apps/web/components/assistant-ui -type f | xargs -I {} basename {})",
+      "mcp__supabase__get_project_url",
+      "mcp__supabase__get_publishable_keys",
+      "mcp__supabase__execute_sql"
     ]
   },
   "enableAllProjectMcpServers": true,

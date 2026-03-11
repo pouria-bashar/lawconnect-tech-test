@@ -9,7 +9,8 @@ export async function POST(req: Request) {
 
   const agent = mastra.getAgent("chefAgent");
 
-  const stream = await agent.stream(messages);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stream = await agent.stream(messages, { toolCallStreaming: true } as any);
 
   return createUIMessageStreamResponse({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
