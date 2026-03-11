@@ -34,4 +34,7 @@ export const renderBlogTool = createTool({
   outputSchema: z.object({
     success: z.boolean(),
   }),
+  execute: async () => {
+    return { success: true };
+  },
 });
