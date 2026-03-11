@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
     if (user) {
       // Already logged in, redirect to home
       const url = request.nextUrl.clone();
-      url.pathname = "/";
+      url.pathname = "/lead-capture";
       return NextResponse.redirect(url);
     }
     return supabaseResponse;

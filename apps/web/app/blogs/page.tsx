@@ -8,8 +8,6 @@ import {
 import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
 import { TiptapRenderToolUI } from "@/components/assistant-ui/tiptap-render-tool";
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 const BLOG_SUGGESTIONS: Suggestion[] = [
   {
@@ -43,41 +41,16 @@ const WELCOME = (
 );
 
 export default function BlogsPage() {
-  const router = useRouter();
-
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: "/api/blogs/chat",
     }),
   });
 
-  async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  }
-
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <TiptapRenderToolUI />
-      <div className="relative h-dvh">
-        <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-          >
-            Home
-          </button>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-          >
-            Sign out
-          </button>
-        </div>
+      <div className="relative h-[calc(100dvh-3rem)]">
         <Thread
           config={{
             maxWidth: "48rem",

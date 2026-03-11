@@ -4,6 +4,7 @@ import "@workspace/ui/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { cn } from "@workspace/ui/lib/utils";
+import { AppHeader } from "@/components/app-header";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -25,7 +26,10 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            <AppHeader />
+            {children}
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
