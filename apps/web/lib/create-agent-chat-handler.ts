@@ -2,7 +2,7 @@ import { createUIMessageStreamResponse } from "ai";
 import { toAISdkStream } from "@mastra/ai-sdk";
 import { mastra } from "@/mastra";
 
-export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent") {
+export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "syntheticTestAgent") {
   return async function POST(req: Request) {
     const { messages } = await req.json();
 
