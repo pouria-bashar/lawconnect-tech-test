@@ -1,5 +1,5 @@
-import { createUIMessageStreamResponse } from "ai";
-import { toAISdkStream } from "@mastra/ai-sdk";
+import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
+import { toAISdkStream } from "@mastra/ai-sdk"
 import { mastra } from "@/mastra";
 
 export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "syntheticTestAgent") {
@@ -8,12 +8,20 @@ export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "s
 
     const agent = mastra.getAgent(agentName);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const stream = await agent.stream(messages, { toolCallStreaming: true } as any);
+    const stream = await agent.stream(messages);
+
+    const uiMessageStream = createUIMessageStream({
+      originalMessages: messages,
+      execute: async ({ writer }) => {
+        for await (const part of toAISdkStream(stream, { from: "agent" })) {
+          // @ts-expect-error - @mastra/ai-sdk FinishReason includes 'unknown' which ai@6 FinishReason does not
+          await writer.write(part);
+        }
+      },
+    });
 
     return createUIMessageStreamResponse({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      stream: toAISdkStream(stream, { from: "agent" }) as any,
+      stream: uiMessageStream,
     });
   };
 }

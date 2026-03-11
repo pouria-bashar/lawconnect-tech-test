@@ -12,21 +12,21 @@ import { TestRenderToolUI } from "@/components/assistant-ui/test-render-tool";
 const TEST_SUGGESTIONS: Suggestion[] = [
   {
     prompt:
-      "Write a test that checks if https://example.com loads correctly and has the main heading visible",
-    title: "Basic Page Load",
-    description: "Verify a page loads and displays key elements",
+      'Navigate to https://lawconnect.com/en-au and verify that the h1 heading "Find trusted lawyers across Australia" is visible',
+    title: "Verify H1 Heading",
+    description: "Check the main heading is displayed on the homepage",
   },
   {
     prompt:
-      "Write a test that fills out a login form, submits it, and verifies the user is redirected to the dashboard",
-    title: "Login Flow",
-    description: "Test authentication with form submission",
+      'Navigate to https://lawconnect.com/en-au, click on "Find a Lawyer", and verify the search page loads with a search input visible',
+    title: "Find a Lawyer Flow",
+    description: "Test the lawyer search navigation and page load",
   },
   {
     prompt:
-      "Write a test that checks if an API endpoint returns a 200 status and valid JSON response",
-    title: "API Health Check",
-    description: "Verify API availability and response format",
+      "Navigate to https://lawconnect.com/en-au and verify that all navigation links in the header return 200 status codes",
+    title: "Navigation Links Health",
+    description: "Check all header nav links are reachable",
   },
 ];
 
