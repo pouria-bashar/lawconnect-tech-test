@@ -52,6 +52,29 @@ const componentDefs = {
   Select: withClassName(shadcnComponentDefinitions.Select),
   Checkbox: withClassName(shadcnComponentDefinitions.Checkbox),
   Switch: withClassName(shadcnComponentDefinitions.Switch),
+  Textarea: {
+    props: z.object({
+      label: z.string().nullable().describe("Label displayed above the textarea"),
+      name: z.string().nullable().describe("Field name for form submission"),
+      placeholder: z.string().nullable().describe("Placeholder text"),
+      value: z.string().nullable().describe("Current value (use $bindState for two-way binding)"),
+      rows: z.number().nullable().describe("Number of visible text rows (default 4)"),
+      checks: z.array(z.any()).nullable().describe("Validation checks array"),
+      validateOn: z.string().nullable().describe("When to validate: blur | change | submit"),
+      className: z
+        .array(z.string())
+        .nullable()
+        .describe("Additional CSS class names"),
+    }),
+    description:
+      "Multi-line text input for longer form content such as notes, descriptions, or comments. Supports validation and state binding just like Input.",
+    example: {
+      label: "Additional Notes",
+      placeholder: "Enter any additional details...",
+      value: { $bindState: "/notes" },
+      rows: 4,
+    },
+  },
 };
 
 export const catalog = defineCatalog(schema, {

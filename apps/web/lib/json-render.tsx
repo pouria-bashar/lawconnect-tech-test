@@ -36,6 +36,7 @@ import {
   SelectItem,
 } from "@workspace/ui/components/select";
 import { Switch } from "@workspace/ui/components/switch";
+import { Textarea } from "@workspace/ui/components/textarea";
 import { Progress } from "@workspace/ui/components/progress";
 import {
   Tabs,
@@ -436,23 +437,58 @@ const registryDef = defineRegistry(catalog, {
       );
     }),
 
+    Textarea: (({ props, bindings, emit }) => {
+      const [value, setValue] = useBoundOrLocal<string>(props.value, bindings?.value, "");
+      const validation = useFieldValidation(bindings?.value ?? "", {
+        checks: props.checks as any,
+        validateOn: props.validateOn as any,
+      });
+
+      return (
+        <div className={cn("flex flex-col gap-2", ...cls(props))}>
+          {props.label && <Label htmlFor={props.name ?? undefined}>{props.label}</Label>}
+          <Textarea
+            id={props.name ?? undefined}
+            name={props.name ?? undefined}
+            placeholder={props.placeholder ?? ""}
+            rows={props.rows ?? 4}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onFocus={() => emit("focus")}
+            onBlur={() => { validation.touch(); emit("blur"); }}
+            className={cn(!validation.isValid && "border-destructive")}
+          />
+          {validation.errors.length > 0 && (
+            <p className="text-xs text-destructive">{validation.errors[0]}</p>
+          )}
+        </div>
+      );
+    }),
+
     // ── Interactive ─────────────────────────────────────────────────────
 
-    Button: (({ props, emit, loading }) => (
-      <Button
-        variant={
-          props.variant === "primary" ? "default"
-            : props.variant === "danger" ? "destructive"
-            : props.variant === "secondary" ? "secondary"
-            : "default"
-        }
-        disabled={loading || (props.disabled ?? false)}
-        onClick={() => emit("press")}
-        className={cn("w-full", ...cls(props))}
-      >
-        {loading ? "..." : (props.label || String((props as Record<string, unknown>).text ?? "") || "Button")}
-      </Button>
-    )),
+    Button: (({ props, emit, loading }) => {
+      const variant = props.variant === "primary" ? "default"
+        : props.variant === "danger" ? "destructive"
+        : props.variant === "secondary" ? "secondary"
+        : "default";
+      const isPrimary = !props.variant || props.variant === "primary";
+
+      return (
+        <Button
+          variant={variant}
+          disabled={loading || (props.disabled ?? false)}
+          onClick={() => emit("press")}
+          className={cn(
+            "w-full",
+            isPrimary && "bg-emerald-600 hover:bg-emerald-700 text-white",
+            ...cls(props),
+          )}
+        >
+          {loading ? "..." : (props.label || String((props as Record<string, unknown>).text ?? "") || "Button")}
+        </Button>
+      );
+    }),
   },
 });
 
