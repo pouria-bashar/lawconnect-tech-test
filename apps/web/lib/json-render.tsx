@@ -82,6 +82,30 @@ function useBoundOrLocal<T>(
 // but defineRegistry expects exact prop matches from the catalog schema.
 const registryDef = defineRegistry(catalog, {
   components: {
+    // ── Branding ────────────────────────────────────────────────────────
+
+    Brand: (({ props }: { props: Record<string, unknown> }) => (
+      <div className={cn("mb-5 flex items-center gap-2.5", ...cls(props))}>
+        <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-600">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="size-5 text-white"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+        <span className="text-lg font-bold tracking-tight">
+          <span className="text-emerald-600">Law</span>
+          <span className="text-foreground">Network</span>
+        </span>
+      </div>
+    )) as any,
+
     // ── Layout ──────────────────────────────────────────────────────────
 
     Card: (({ props, children }) => {

@@ -22,6 +22,17 @@ function withClassName<T extends { props: z.ZodType; [key: string]: unknown }>(
 }
 
 const componentDefs = {
+  Brand: {
+    props: z.object({
+      className: z
+        .array(z.string())
+        .nullable()
+        .describe("Additional CSS class names"),
+    }),
+    description:
+      "LawNetwork brand header. Renders the company logo/wordmark. Use as the FIRST child of the root Card in every form. Takes no content props — branding is built-in.",
+    example: {},
+  },
   Card: withClassName(shadcnComponentDefinitions.Card),
   Stack: withClassName(shadcnComponentDefinitions.Stack),
   Grid: withClassName(shadcnComponentDefinitions.Grid),
