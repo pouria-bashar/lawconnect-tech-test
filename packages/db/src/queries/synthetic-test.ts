@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import {
   tests,
@@ -51,6 +51,23 @@ export async function updateTest(
 
 export async function deleteTest(id: string): Promise<void> {
   await db.delete(tests).where(eq(tests.id, id));
+}
+
+// --- Cron Scheduling ---
+
+export async function scheduleCronJob(
+  testId: string,
+  cron: string,
+): Promise<void> {
+  await db.execute(
+    sql`SELECT synthetic_test.schedule_cron_job(${testId}::uuid, ${cron})`,
+  );
+}
+
+export async function unscheduleCronJob(testId: string): Promise<void> {
+  await db.execute(
+    sql`SELECT synthetic_test.unschedule_cron_job(${testId}::uuid)`,
+  );
 }
 
 // --- Test Reports ---

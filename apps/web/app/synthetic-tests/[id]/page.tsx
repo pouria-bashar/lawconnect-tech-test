@@ -14,6 +14,9 @@ import {
   LoaderIcon,
   SaveIcon,
   ArrowLeftIcon,
+  ClockIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -149,6 +152,17 @@ interface RunResult {
   reportId: string;
 }
 
+interface TestReport {
+  id: string;
+  testId: string;
+  status: string;
+  logs: string | null;
+  errors: string | null;
+  durationMs: number | null;
+  triggerType: string;
+  createdAt: string;
+}
+
 export default function SyntheticTestDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [test, setTest] = useState<TestData | null>(null);
@@ -160,6 +174,23 @@ export default function SyntheticTestDetailPage() {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [reports, setReports] = useState<TestReport[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(true);
+  const [expandedReport, setExpandedReport] = useState<string | null>(null);
+
+  const fetchReports = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/synthetic-test/${id}/reports`);
+      if (res.ok) {
+        const data = await res.json();
+        setReports(data);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setReportsLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
     async function fetchTest() {
@@ -179,7 +210,8 @@ export default function SyntheticTestDetailPage() {
       }
     }
     fetchTest();
-  }, [id]);
+    fetchReports();
+  }, [id, fetchReports]);
 
   const handleCodeChange = useCallback(
     (value: string | undefined) => {
@@ -244,8 +276,9 @@ export default function SyntheticTestDetailPage() {
       });
     } finally {
       setIsRunning(false);
+      fetchReports();
     }
-  }, [id]);
+  }, [id, fetchReports]);
 
   if (loading) {
     return (
@@ -410,6 +443,102 @@ export default function SyntheticTestDetailPage() {
                 )}
               </div>
             )}
+          </div>
+        )}
+      </div>
+
+      {/* Test Reports */}
+      <div className="mt-8">
+        <h2 className="mb-4 font-semibold text-lg">Test Reports</h2>
+        {reportsLoading ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            Loading reports...
+          </div>
+        ) : reports.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No reports yet. Run the test to generate the first report.
+          </p>
+        ) : (
+          <div className="overflow-hidden rounded-xl border">
+            {/* Table header */}
+            <div className="grid grid-cols-[1fr_100px_100px_120px_140px] gap-2 border-b bg-muted/30 px-4 py-2.5 text-xs font-medium text-muted-foreground">
+              <span>Time</span>
+              <span>Status</span>
+              <span>Trigger</span>
+              <span>Duration</span>
+              <span>Details</span>
+            </div>
+            {reports.map((report) => (
+              <div key={report.id} className="border-b last:border-b-0">
+                <div className="grid grid-cols-[1fr_100px_100px_120px_140px] items-center gap-2 px-4 py-2.5 text-sm">
+                  <span className="flex items-center gap-1.5 text-muted-foreground">
+                    <ClockIcon className="size-3" />
+                    {new Date(report.createdAt).toLocaleString()}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    {report.status === "pass" && (
+                      <CheckCircleIcon className="size-3.5 text-emerald-500" />
+                    )}
+                    {report.status === "fail" && (
+                      <XCircleIcon className="size-3.5 text-red-500" />
+                    )}
+                    {report.status === "error" && (
+                      <AlertTriangleIcon className="size-3.5 text-amber-500" />
+                    )}
+                    <span
+                      className={cn(
+                        "text-xs font-medium capitalize",
+                        report.status === "pass" && "text-emerald-600",
+                        report.status === "fail" && "text-red-600",
+                        report.status === "error" && "text-amber-600",
+                      )}
+                    >
+                      {report.status}
+                    </span>
+                  </span>
+                  <span className="text-xs text-muted-foreground capitalize">
+                    {report.triggerType}
+                  </span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {report.durationMs != null
+                      ? `${(report.durationMs / 1000).toFixed(1)}s`
+                      : "—"}
+                  </span>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() =>
+                      setExpandedReport(
+                        expandedReport === report.id ? null : report.id,
+                      )
+                    }
+                  >
+                    {expandedReport === report.id ? (
+                      <ChevronDownIcon className="size-3.5" />
+                    ) : (
+                      <ChevronRightIcon className="size-3.5" />
+                    )}
+                    {expandedReport === report.id ? "Hide" : "Show"} logs
+                  </button>
+                </div>
+                {expandedReport === report.id &&
+                  (report.logs || report.errors) && (
+                    <div className="max-h-48 overflow-auto bg-zinc-950 px-4 py-3">
+                      {report.logs && (
+                        <pre className="font-mono text-xs text-zinc-300 whitespace-pre-wrap">
+                          {report.logs}
+                        </pre>
+                      )}
+                      {report.errors && (
+                        <pre className="mt-2 font-mono text-xs text-red-400 whitespace-pre-wrap">
+                          {report.errors}
+                        </pre>
+                      )}
+                    </div>
+                  )}
+              </div>
+            ))}
           </div>
         )}
       </div>

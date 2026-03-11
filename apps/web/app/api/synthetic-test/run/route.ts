@@ -6,7 +6,13 @@ import { NextResponse } from "next/server";
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
-  const { testId } = await req.json();
+  // Validate cron secret when header is present
+  const cronSecret = req.headers.get("x-cron-secret");
+  if (cronSecret && cronSecret !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: "Invalid cron secret" }, { status: 401 });
+  }
+
+  const { testId, triggerType = "manual" } = await req.json();
 
   if (!testId || typeof testId !== "string") {
     return NextResponse.json(
@@ -29,7 +35,7 @@ export async function POST(req: Request) {
       logs: result.logs,
       errors: result.errors,
       durationMs: result.durationMs,
-      triggerType: "manual",
+      triggerType,
     });
 
     return NextResponse.json({ ...result, reportId: report.id });

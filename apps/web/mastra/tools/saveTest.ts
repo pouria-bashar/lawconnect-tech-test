@@ -1,6 +1,6 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import { saveTest } from "@workspace/db/queries/synthetic-test";
+import { saveTest, scheduleCronJob } from "@workspace/db/queries/synthetic-test";
 
 export const saveTestTool = createTool({
   id: "save_test",
@@ -38,6 +38,11 @@ export const saveTestTool = createTool({
         code: input.code,
         cron: input.cron,
       });
+
+      if (input.cron) {
+        await scheduleCronJob(test.id, input.cron);
+      }
+
       return { success: true, id: test.id, url: `${host}/synthetic-tests/${test.id}` };
     } catch (error) {
       const message =
