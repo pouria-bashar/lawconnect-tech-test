@@ -4,7 +4,6 @@ export const MODEL_ID_KEY = "model-id";
 export const MODEL_OPTIONS = [
   { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
   { value: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-  { value: "openai/gpt-5.3-codex", label: "GPT-5.3 Codex" },
   { value: "openai/gpt-4o", label: "GPT-4o" },
   { value: "openai/gpt-4o-mini", label: "GPT-4o Mini" },
   { value: "anthropic/claude-opus-4-6", label: "Claude Opus 4.6" },
