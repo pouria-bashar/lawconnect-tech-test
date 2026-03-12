@@ -78,6 +78,7 @@ export default function Page() {
       <div className="relative h-[calc(100dvh-3rem)]">
         <Thread
           config={{
+            maxWidth: "48rem",
             welcome: WELCOME,
             suggestions: LEGAL_SUGGESTIONS,
             composerPlaceholder: "Describe your legal issue...",

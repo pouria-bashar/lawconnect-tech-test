@@ -61,7 +61,7 @@ export default function SyntheticTestPage() {
       <div className="relative h-[calc(100dvh-3rem)]">
         <Thread
           config={{
-            maxWidth: "56rem",
+            maxWidth: "48rem",
             welcome: WELCOME,
             suggestions: TEST_SUGGESTIONS,
             composerPlaceholder: "Describe the test you want to create...",
