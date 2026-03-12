@@ -12,6 +12,8 @@ import type { Suggestion } from "@/components/assistant-ui/thread";
 import { JsonRenderToolUI } from "@/components/assistant-ui/json-render-tool";
 import { FindLawyerToolUI } from "@/components/assistant-ui/find-lawyer-tool";
 import { AskQuestionToolUI } from "@/components/assistant-ui/ask-question-tool";
+import { Player } from "@remotion/player";
+import { LeadCaptureVideo } from "@/remotion-compositions/LeadCapture";
 
 
 const LEGAL_SUGGESTIONS: Suggestion[] = [
@@ -31,6 +33,20 @@ const LEGAL_SUGGESTIONS: Suggestion[] = [
     description: "Buying, selling, leases, disputes",
   },
 ];
+
+const HELP_VIDEO = (
+  <Player
+    component={LeadCaptureVideo}
+    compositionWidth={1280}
+    compositionHeight={720}
+    durationInFrames={450}
+    fps={30}
+    autoPlay
+    loop
+    style={{ width: "100%" }}
+    controls
+  />
+);
 
 const WELCOME = (
   <>
@@ -69,6 +85,7 @@ export default function Page() {
               title: "Legal Intake Assistant",
               description:
                 "Describe your legal issue and the AI will guide you through a short intake questionnaire. Once complete, it generates a pre-filled form and helps you find a suitable lawyer.",
+              video: HELP_VIDEO,
             },
             selectedModel,
             onModelChange: setSelectedModel,

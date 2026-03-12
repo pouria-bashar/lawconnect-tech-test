@@ -2,6 +2,7 @@ import { Agent } from "@mastra/core/agent";
 import { getModelFromContext } from "@/lib/model-config";
 import { renderTestTool } from "../tools/renderTest";
 import { saveTestTool } from "../tools/saveTest";
+import { findTestTool } from "../tools/findTest";
 
 export const syntheticTestAgent = new Agent({
   id: "synthetic-test-agent",
@@ -64,6 +65,11 @@ test.describe("Homepage", () => {
 });
 \`\`\`
 
+## FINDING EXISTING TESTS
+- When the user asks to find, search for, or view a previously saved test, use the find_test tool.
+- Present the results as a list with the test name and a clickable link to view it.
+- If no query is provided, show the most recent tests.
+
 ## IMPORTANT RULES
 - ALWAYS use the render_test tool to display test code. NEVER output test code as plain text or in markdown code blocks.
 - Generate complete, runnable Playwright test files.
@@ -72,5 +78,5 @@ test.describe("Homepage", () => {
 - Use descriptive test names that explain what is being tested.
 - Provide a short, descriptive name for each test file.`,
   model: ({ requestContext }) => getModelFromContext(requestContext),
-  tools: { render_test: renderTestTool, save_test: saveTestTool },
+  tools: { render_test: renderTestTool, save_test: saveTestTool, find_test: findTestTool },
 });

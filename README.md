@@ -1,4 +1,4 @@
-# SustainBit AI Platform
+# TechTest
 
 AI-powered monorepo with three modules: legal lead capture, blog writing, and synthetic test generation.
 

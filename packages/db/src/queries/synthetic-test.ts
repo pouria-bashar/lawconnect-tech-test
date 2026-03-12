@@ -1,4 +1,4 @@
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, ilike, or } from "drizzle-orm";
 import { db } from "@workspace/db";
 import {
   tests,
@@ -47,6 +47,20 @@ export async function updateTest(
     .where(eq(tests.id, id))
     .returning();
   return test!;
+}
+
+export async function searchTests(
+  query: string,
+  options: { limit?: number } = {},
+): Promise<SelectTest[]> {
+  const { limit = 10 } = options;
+  const pattern = `%${query}%`;
+  return db
+    .select()
+    .from(tests)
+    .where(or(ilike(tests.name, pattern), ilike(tests.description, pattern)))
+    .orderBy(desc(tests.createdAt))
+    .limit(limit);
 }
 
 export async function deleteTest(id: string): Promise<void> {

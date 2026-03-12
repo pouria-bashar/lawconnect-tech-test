@@ -48,6 +48,12 @@ export type Suggestion = {
   description: string;
 };
 
+export type HelpConfig = {
+  title: string;
+  description: string;
+  video?: ReactNode;
+};
+
 export type ThreadConfig = {
   maxWidth?: string;
   welcome: ReactNode;
@@ -55,7 +61,7 @@ export type ThreadConfig = {
   composerPlaceholder?: string;
   selectedModel?: string;
   onModelChange?: (model: string) => void;
-  help?: { title: string; description: string };
+  help?: HelpConfig;
 };
 
 export const Thread: FC<{ config: ThreadConfig }> = ({ config }) => {
@@ -168,7 +174,7 @@ const Composer: FC<{
   placeholder?: string;
   selectedModel?: string;
   onModelChange?: (model: string) => void;
-  help?: { title: string; description: string };
+  help?: HelpConfig;
 }> = ({ placeholder, selectedModel, onModelChange, help }) => {
   return (
     <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-2xl border border-input bg-background px-1 pt-2 outline-none transition-shadow has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-ring/20">
@@ -191,7 +197,7 @@ const Composer: FC<{
 const ComposerAction: FC<{
   selectedModel?: string;
   onModelChange?: (model: string) => void;
-  help?: { title: string; description: string };
+  help?: HelpConfig;
 }> = ({ selectedModel, onModelChange, help }) => {
   return (
     <div className="aui-composer-action-wrapper relative mx-2 mb-2 flex items-center justify-between">
@@ -207,11 +213,14 @@ const ComposerAction: FC<{
                 <HelpCircleIcon className="size-4" />
               </TooltipIconButton>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-4xl">
               <DialogHeader>
                 <DialogTitle>{help.title}</DialogTitle>
                 <DialogDescription>{help.description}</DialogDescription>
               </DialogHeader>
+              {help.video && (
+                <div className="overflow-hidden rounded-lg">{help.video}</div>
+              )}
             </DialogContent>
           </Dialog>
         )}
