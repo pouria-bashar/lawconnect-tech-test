@@ -1,6 +1,7 @@
 import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
 import { toAISdkStream } from "@mastra/ai-sdk"
 import { RequestContext } from "@mastra/core/request-context";
+import { MODEL_ID_KEY } from "@/lib/model-config";
 import { mastra } from "@/mastra";
 
 export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "syntheticTestAgent") {
@@ -11,7 +12,7 @@ export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "s
 
     const requestContext = new RequestContext();
     if (modelId) {
-      requestContext.set("model-id", modelId);
+      requestContext.set(MODEL_ID_KEY, modelId);
     }
 
     const stream = await agent.stream(messages, { requestContext });

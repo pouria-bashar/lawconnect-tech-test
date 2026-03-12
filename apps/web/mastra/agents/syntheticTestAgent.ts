@@ -1,4 +1,5 @@
 import { Agent } from "@mastra/core/agent";
+import { getModelFromContext } from "@/lib/model-config";
 import { renderTestTool } from "../tools/renderTest";
 import { saveTestTool } from "../tools/saveTest";
 
@@ -70,9 +71,6 @@ test.describe("Homepage", () => {
 - Always import from "@playwright/test".
 - Use descriptive test names that explain what is being tested.
 - Provide a short, descriptive name for each test file.`,
-  model: ({ requestContext }) => {
-    const modelId = requestContext?.get("model-id") as string | undefined;
-    return modelId ?? "google/gemini-2.5-flash";
-  },
+  model: ({ requestContext }) => getModelFromContext(requestContext),
   tools: { render_test: renderTestTool, save_test: saveTestTool },
 });

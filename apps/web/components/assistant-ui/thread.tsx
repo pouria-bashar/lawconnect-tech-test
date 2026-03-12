@@ -31,21 +31,13 @@ import {
   SquareIcon,
 } from "lucide-react";
 import type { FC, ReactNode } from "react";
+import { DEFAULT_MODEL, MODEL_OPTIONS } from "@/lib/model-config";
 
 export type Suggestion = {
   prompt: string;
   title: string;
   description: string;
 };
-
-const MODEL_OPTIONS = [
-  { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-  { value: "google/gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-  { value: "google/gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-  { value: "openai/gpt-4o", label: "GPT-4o" },
-  { value: "openai/gpt-4o-mini", label: "GPT-4o Mini" },
-  { value: "anthropic/claude-sonnet-4-20250514", label: "Claude Sonnet 4" },
-] as const;
 
 export type ThreadConfig = {
   maxWidth?: string;
@@ -189,22 +181,22 @@ const ComposerAction: FC<{
 }> = ({ selectedModel, onModelChange }) => {
   return (
     <div className="aui-composer-action-wrapper relative mx-2 mb-2 flex items-center justify-between">
-      <div className="flex items-center gap-1">
-        {onModelChange && (
-          <select
-            value={selectedModel ?? MODEL_OPTIONS[0].value}
-            onChange={(e) => onModelChange(e.target.value)}
-            className="h-8 rounded-md border-none bg-transparent px-2 text-xs text-muted-foreground outline-none hover:text-foreground focus:ring-0"
-            aria-label="Select model"
-          >
-            {MODEL_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+      {onModelChange ? (
+        <select
+          value={selectedModel ?? DEFAULT_MODEL}
+          onChange={(e) => onModelChange(e.target.value)}
+          className="h-8 rounded-md border-none bg-transparent px-2 text-xs text-muted-foreground outline-none hover:text-foreground focus:ring-0"
+          aria-label="Select model"
+        >
+          {MODEL_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <div />
+      )}
       <AuiIf condition={(s) => !s.thread.isRunning}>
         <ComposerPrimitive.Send asChild>
           <TooltipIconButton

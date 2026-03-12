@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DEFAULT_MODEL } from "@/lib/model-config";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import {
   useChatRuntime,
@@ -13,19 +14,19 @@ import { AskQuestionToolUI } from "@/components/assistant-ui/ask-question-tool";
 
 const BLOG_SUGGESTIONS: Suggestion[] = [
   {
-    prompt: "Write a blog post about the future of AI in healthcare",
-    title: "AI in Healthcare",
-    description: "Innovations, challenges, and the road ahead",
+    prompt: "Write a blog post about how to choose the right family lawyer in Australia",
+    title: "Choosing a Family Lawyer",
+    description: "Key factors, questions to ask, and red flags to watch for",
   },
   {
-    prompt: "Write a blog post about best practices for remote work",
-    title: "Remote Work",
-    description: "Productivity tips, tools, and team culture",
+    prompt: "Write a blog post explaining the property settlement process after divorce in Australia",
+    title: "Property Settlement After Divorce",
+    description: "Steps, timelines, and what to expect",
   },
   {
-    prompt: "Write a blog post about sustainable living tips",
-    title: "Sustainable Living",
-    description: "Eco-friendly habits for everyday life",
+    prompt: "Write a blog post about common mistakes people make when applying for an Australian visa",
+    title: "Visa Application Mistakes",
+    description: "Pitfalls to avoid and tips for a successful application",
   },
 ];
 
@@ -43,7 +44,7 @@ const WELCOME = (
 );
 
 export default function BlogsPage() {
-  const [selectedModel, setSelectedModel] = useState("google/gemini-2.5-flash");
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
 
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
