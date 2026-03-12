@@ -32,11 +32,9 @@ export const renderUiTool = createTool({
       .describe("Initial state for the UI"),
     legalArea: z
       .string()
-      .optional()
       .describe("The legal area/category from the intake (e.g. 'Property Law', 'Family Law', 'Immigration Law')"),
     description: z
       .string()
-      .optional()
       .describe("A brief description of the user's legal issue gathered from the intake questions"),
   }),
   outputSchema: z.object({
