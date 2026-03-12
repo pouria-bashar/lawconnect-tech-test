@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Sign Up",
-  description: "Create your SustainBit account",
+  description: "Create your TechTest account",
 }
 
 export default function SignupLayout({

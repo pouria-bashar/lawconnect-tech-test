@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Log In",
-  description: "Sign in to your SustainBit account",
+  description: "Sign in to your TechTest account",
 }
 
 export default function LoginLayout({

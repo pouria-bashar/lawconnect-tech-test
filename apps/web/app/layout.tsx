@@ -1,12 +1,12 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google"
+import { Geist, JetBrains_Mono } from "next/font/google"
 
 import "@workspace/ui/globals.css"
 
 export const metadata: Metadata = {
   title: {
-    default: "SustainBit",
-    template: "%s | SustainBit",
+    default: "LawConnect Tech Test",
+    template: "%s | LawConnect Tech Test",
   },
   description: "AI-powered legal assistance and content generation platform",
 }

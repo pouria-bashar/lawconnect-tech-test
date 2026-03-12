@@ -1,9 +1,11 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, arrayContains } from "drizzle-orm";
 import { db } from "@workspace/db";
 import {
   leads,
+  lawyers,
   type InsertLead,
   type SelectLead,
+  type SelectLawyer,
 } from "@workspace/db/schema/lead-capture";
 
 export async function saveLead(
@@ -46,4 +48,26 @@ export async function updateLead(
 
 export async function deleteLead(id: string): Promise<void> {
   await db.delete(leads).where(eq(leads.id, id));
+}
+
+export async function findLawyersByIssueType(
+  issueType: string,
+): Promise<SelectLawyer[]> {
+  let results = await db
+    .select()
+    .from(lawyers)
+    .where(arrayContains(lawyers.issueTypes, [issueType]))
+    .orderBy(desc(lawyers.rating))
+    .limit(3);
+
+  if (results.length === 0) {
+    results = await db
+      .select()
+      .from(lawyers)
+      .where(arrayContains(lawyers.issueTypes, ["general"]))
+      .orderBy(desc(lawyers.rating))
+      .limit(3);
+  }
+
+  return results;
 }
