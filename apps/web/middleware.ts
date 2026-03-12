@@ -31,8 +31,15 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // Redirect signup to login (signup is disabled)
+  if (pathname.startsWith("/signup")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
   // Allow auth routes and auth callback
-  if (pathname.startsWith("/login") || pathname.startsWith("/signup") || pathname.startsWith("/auth")) {
+  if (pathname.startsWith("/login") || pathname.startsWith("/auth")) {
     if (user) {
       // Already logged in, redirect to home
       const url = request.nextUrl.clone();
