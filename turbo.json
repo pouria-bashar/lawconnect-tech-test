@@ -1,6 +1,18 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "OPENAI_API_KEY",
+    "GOOGLE_GENERATIVE_AI_API_KEY",
+    "DATABASE_URL",
+    "FIRECRAWL_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "E2B_API_KEY",
+    "E2B_TEMPLATE",
+    "E2B_SANDBOX_TIMEOUT",
+    "E2B_SANDBOX_ID",
+    "CRON_SECRET"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
