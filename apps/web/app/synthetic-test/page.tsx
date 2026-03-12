@@ -64,8 +64,12 @@ export default function SyntheticTestPage() {
             maxWidth: "56rem",
             welcome: WELCOME,
             suggestions: TEST_SUGGESTIONS,
-            composerPlaceholder:
-              "Describe the test you want to create...",
+            composerPlaceholder: "Describe the test you want to create...",
+            help: {
+              title: "Synthetic Test Generator",
+              description:
+                "Describe what you want to test and the AI will generate a Playwright end-to-end test for you. You can then dry-run the test, tweak it, and schedule it to run on a cron.",
+            },
             selectedModel,
             onModelChange: setSelectedModel,
           }}

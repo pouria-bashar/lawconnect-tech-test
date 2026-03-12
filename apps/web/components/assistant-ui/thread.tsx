@@ -5,6 +5,14 @@ import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@workspace/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@workspace/ui/components/dialog";
 import { cn } from "@workspace/ui/lib/utils";
 import {
   ActionBarMorePrimitive,
@@ -25,6 +33,7 @@ import {
   ChevronRightIcon,
   CopyIcon,
   DownloadIcon,
+  HelpCircleIcon,
   MoreHorizontalIcon,
   PencilIcon,
   RefreshCwIcon,
@@ -46,6 +55,7 @@ export type ThreadConfig = {
   composerPlaceholder?: string;
   selectedModel?: string;
   onModelChange?: (model: string) => void;
+  help?: { title: string; description: string };
 };
 
 export const Thread: FC<{ config: ThreadConfig }> = ({ config }) => {
@@ -81,6 +91,7 @@ export const Thread: FC<{ config: ThreadConfig }> = ({ config }) => {
             placeholder={config.composerPlaceholder}
             selectedModel={config.selectedModel}
             onModelChange={config.onModelChange}
+            help={config.help}
           />
         </ThreadPrimitive.ViewportFooter>
       </ThreadPrimitive.Viewport>
@@ -157,7 +168,8 @@ const Composer: FC<{
   placeholder?: string;
   selectedModel?: string;
   onModelChange?: (model: string) => void;
-}> = ({ placeholder, selectedModel, onModelChange }) => {
+  help?: { title: string; description: string };
+}> = ({ placeholder, selectedModel, onModelChange, help }) => {
   return (
     <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-2xl border border-input bg-background px-1 pt-2 outline-none transition-shadow has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-ring/20">
       <ComposerPrimitive.Input
@@ -170,6 +182,7 @@ const Composer: FC<{
       <ComposerAction
         selectedModel={selectedModel}
         onModelChange={onModelChange}
+        help={help}
       />
     </ComposerPrimitive.Root>
   );
@@ -178,25 +191,45 @@ const Composer: FC<{
 const ComposerAction: FC<{
   selectedModel?: string;
   onModelChange?: (model: string) => void;
-}> = ({ selectedModel, onModelChange }) => {
+  help?: { title: string; description: string };
+}> = ({ selectedModel, onModelChange, help }) => {
   return (
     <div className="aui-composer-action-wrapper relative mx-2 mb-2 flex items-center justify-between">
-      {onModelChange ? (
-        <select
-          value={selectedModel ?? DEFAULT_MODEL}
-          onChange={(e) => onModelChange(e.target.value)}
-          className="h-8 rounded-md border-none bg-transparent px-2 text-xs text-muted-foreground outline-none hover:text-foreground focus:ring-0"
-          aria-label="Select model"
-        >
-          {MODEL_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <div />
-      )}
+      <div className="flex items-center gap-1">
+        {help && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <TooltipIconButton
+                tooltip="Help"
+                variant="ghost"
+                className="size-8 text-muted-foreground"
+              >
+                <HelpCircleIcon className="size-4" />
+              </TooltipIconButton>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{help.title}</DialogTitle>
+                <DialogDescription>{help.description}</DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        )}
+        {onModelChange && (
+          <select
+            value={selectedModel ?? DEFAULT_MODEL}
+            onChange={(e) => onModelChange(e.target.value)}
+            className="h-8 rounded-md border-none bg-transparent px-2 text-xs text-muted-foreground outline-none hover:text-foreground focus:ring-0"
+            aria-label="Select model"
+          >
+            {MODEL_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
       <AuiIf condition={(s) => !s.thread.isRunning}>
         <ComposerPrimitive.Send asChild>
           <TooltipIconButton

@@ -64,6 +64,11 @@ export default function BlogsPage() {
             welcome: WELCOME,
             suggestions: BLOG_SUGGESTIONS,
             composerPlaceholder: "Describe the blog post you want to create...",
+            help: {
+              title: "Blog Writer",
+              description:
+                "Tell the AI what you'd like to write about and it will generate a full blog post with rich formatting. You can review, edit, and save it directly.",
+            },
             selectedModel,
             onModelChange: setSelectedModel,
           }}

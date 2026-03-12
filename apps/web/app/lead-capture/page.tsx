@@ -65,6 +65,11 @@ export default function Page() {
             welcome: WELCOME,
             suggestions: LEGAL_SUGGESTIONS,
             composerPlaceholder: "Describe your legal issue...",
+            help: {
+              title: "Legal Intake Assistant",
+              description:
+                "Describe your legal issue and the AI will guide you through a short intake questionnaire. Once complete, it generates a pre-filled form and helps you find a suitable lawyer.",
+            },
             selectedModel,
             onModelChange: setSelectedModel,
           }}
