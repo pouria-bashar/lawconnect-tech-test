@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/lead-capture", label: "Lead Capture" },
   { href: "/blogs", label: "Blogs" },
   { href: "/synthetic-test", label: "Tests" },
+  { href: "/immigration", label: "Immigration" },
 ];
 
 export function AppHeader() {

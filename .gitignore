@@ -39,3 +39,5 @@ npm-debug.log*
 config.toml
 
 settings.local.json
+
+.mastra

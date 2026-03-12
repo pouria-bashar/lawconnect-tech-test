@@ -32,6 +32,13 @@ const projects = [
     href: "/synthetic-test",
     color: "text-violet-500",
   },
+  {
+    title: "Immigration Assistant",
+    description:
+      "AI-guided immigration intake. Answer questions about your visa, citizenship, or other immigration matter and get matched with a specialist immigration lawyer.",
+    href: "/immigration",
+    color: "text-amber-500",
+  },
 ];
 
 export default function HomePage() {
