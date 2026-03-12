@@ -14,7 +14,7 @@ const uiReference = toolPrompt({
     "Use appropriate input types: Input for short text, Select for choices, Checkbox for acknowledgements.",
     "Add a Submit button at the bottom.",
     "EVERY form MUST have a Brand component as the FIRST child of the root Card: { \"type\": \"Brand\", \"props\": {}, \"children\": [] }. Do NOT use an Image, logo, or Heading for branding — always use the Brand component. Do NOT set a 'title' prop on the root Card — use a separate Heading child element AFTER the Brand for the form title.",
-    "PRE-FILLING IS CRITICAL: You MUST use the 'state' field to store every piece of information the user provided throughout the conversation. Bind every Input value to state using { \"$bindState\": \"/path\" }. Fields the user did NOT provide should be empty strings with a helpful placeholder.",
+    "PRE-FILLING IS CRITICAL: You MUST pass a 'state' object in the render_ui tool call containing every piece of information the user provided during the conversation. Every Input MUST use { \"$bindState\": \"/key\" } for its value prop, where the key matches a key in the state object. Fields the user did NOT provide should be empty strings. NEVER omit the state field — the form will appear blank without it.",
     "VALIDATION IS REQUIRED: Add 'checks' to ALL Input fields with appropriate validators. Use 'required' for mandatory fields, 'email' for email fields, 'pattern' with date regex for date fields. DO NOT ADD VALIDATION for phone numbers. Set 'validateOn' to 'blur' for all fields.",
     "NEVER use viewport height classes (min-h-screen, h-screen) — the UI renders inside a fixed-size container.",
   ],
@@ -57,19 +57,38 @@ Dynamically generate 4–6 specific sub-topics that are relevant to the user's c
 Acknowledge their selection. Then call ask_question with type "checkbox", allowOther true.
 Dynamically generate 4–6 options that describe the user's likely situation, goals, urgency, and readiness — tailored to their specific selections from Questions 1 and 2. Always include at least one urgency option (e.g. "There is an urgent deadline") and one readiness/cost option (e.g. "I need to discuss costs first"). The remaining options should be contextually relevant outcomes or next steps based on everything the user has shared so far.
 
-### After all questions: Generate Summary & Form
+### After all questions: Generate Summary & Contact Form
 Once all questions are answered, do the following:
 
 1. Write a brief **Matter Summary** in text:
    "**Subject:** [Brief subject line]
    **Summary:** [2-3 sentence summary of the matter and what the client is seeking]"
 
-2. Then call the render_ui tool to generate a comprehensive intake form PRE-FILLED with all gathered information. The form MUST have sections in this EXACT order:
-   - **Contact Details** section FIRST (full name, email, phone — NO address field, NEVER ask for address)
-   - **Matter Details** section SECOND using EDITABLE Input fields (not plain Text) — pre-fill values from the conversation but let the user edit them. Use Input fields for: legal category, specific aspects (comma-separated), situation/outcome details, urgency status
-   - Additional notes field (empty, for anything else the client wants to add)
-   - A submit button with label "Find a Lawyer" (ALWAYS use this exact label, never "Submit" or anything else)
-   IMPORTANT: Contact Details MUST always come before Matter Details. ALL fields in the form must be editable Input components bound to state. Do NOT use Text components for matter details — always use Input so the user can correct or update the pre-filled values.
+2. Then call the render_ui tool to generate a simple contact form. The form collects ONLY contact details — all matter information was already gathered during the intake questions and will be submitted automatically alongside the form data.
+
+   The form MUST contain ONLY these fields:
+   - **Full Name** (Input, required)
+   - **Email** (Input, required, email validation)
+   - **Phone** (Input, optional)
+   - **Additional Notes** (Input, optional — for anything else the client wants to add)
+   - A submit button with label "Find a Lawyer" (ALWAYS use this exact label)
+
+   Do NOT include matter details, legal category, specific aspects, or situation fields on the form — that information is already captured from the conversation.
+
+   The state object MUST include the contact fields AND all previously gathered intake data (so it is sent on submit):
+   {
+     "state": {
+       "fullName": "",
+       "email": "",
+       "phone": "",
+       "notes": "",
+       "legalCategory": "Property Law",
+       "specificAspects": "Neighbour disputes, Shared property access",
+       "situationDetails": "Dispute over shared driveway"
+     }
+   }
+   The contact fields (fullName, email, phone, notes) should be bound to visible Input fields using { "$bindState": "/fieldName" }.
+   The intake fields (legalCategory, specificAspects, situationDetails) should be included in the state but NOT rendered as visible form fields — they are submitted as hidden data alongside the contact details.
 
 ## IMPORTANT RULES:
 - Ask at most 3 questions, ONE per message. Skip Question 1 if the user already stated their category.

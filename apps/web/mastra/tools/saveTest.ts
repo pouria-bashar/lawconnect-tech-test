@@ -43,7 +43,7 @@ export const saveTestTool = createTool({
         await scheduleCronJob(test.id, input.cron);
       }
 
-      return { success: true, id: test.id, url: `${host}/synthetic-tests/${test.id}` };
+      return { success: true, id: test.id, url: `${host}/synthetic-test/${test.id}` };
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to save test";

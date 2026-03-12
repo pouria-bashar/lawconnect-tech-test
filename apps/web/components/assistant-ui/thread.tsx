@@ -37,9 +37,10 @@ import {
   MoreHorizontalIcon,
   PencilIcon,
   RefreshCwIcon,
+  SparklesIcon,
   SquareIcon,
 } from "lucide-react";
-import type { FC, ReactNode } from "react";
+import { type FC, type ReactNode, useEffect, useState } from "react";
 import { DEFAULT_MODEL, MODEL_OPTIONS } from "@/lib/model-config";
 
 export type Suggestion = {
@@ -271,6 +272,37 @@ const ComposerAction: FC<{
   );
 };
 
+const THINKING_MESSAGES = [
+  "Thinking...",
+  "Analysing your request...",
+  "Cooking up a response...",
+  "Gathering insights...",
+  "Almost there...",
+];
+
+const ThinkingIndicator: FC = () => {
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMessageIndex((i) => (i + 1) % THINKING_MESSAGES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-2 py-1 text-sm text-muted-foreground">
+      <SparklesIcon className="size-4 animate-pulse" />
+      <span
+        key={messageIndex}
+        className="fade-in animate-in duration-300"
+      >
+        {THINKING_MESSAGES[messageIndex]}
+      </span>
+    </div>
+  );
+};
+
 const MessageError: FC = () => {
   return (
     <MessagePrimitive.Error>
@@ -288,6 +320,9 @@ const AssistantMessage: FC = () => {
       data-role="assistant"
     >
       <div className="aui-assistant-message-content wrap-break-word px-2 text-foreground leading-relaxed">
+        <AuiIf condition={(s) => s.message.isLast && s.thread.isRunning && s.message.parts.length === 0}>
+          <ThinkingIndicator />
+        </AuiIf>
         <MessagePrimitive.Parts
           components={{
             Text: MarkdownText,

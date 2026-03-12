@@ -47,7 +47,7 @@ function TiptapBlogRenderer({
           </div>
         )}
       </div>
-      <TiptapEditor content={content} />
+      <TiptapEditor content={content} streaming={loading} />
       {loading && (
         <div className="border-t px-4 py-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">

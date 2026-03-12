@@ -17,6 +17,7 @@ import {
   ClockIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  RefreshCwIcon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -176,6 +177,7 @@ export default function SyntheticTestDetailPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [reports, setReports] = useState<TestReport[]>([]);
   const [reportsLoading, setReportsLoading] = useState(true);
+  const [reportsRefreshing, setReportsRefreshing] = useState(false);
   const [expandedReport, setExpandedReport] = useState<string | null>(null);
 
   const fetchReports = useCallback(async () => {
@@ -191,6 +193,12 @@ export default function SyntheticTestDetailPage() {
       setReportsLoading(false);
     }
   }, [id]);
+
+  const handleRefreshReports = useCallback(async () => {
+    setReportsRefreshing(true);
+    await fetchReports();
+    setReportsRefreshing(false);
+  }, [fetchReports]);
 
   useEffect(() => {
     async function fetchTest() {
@@ -449,7 +457,18 @@ export default function SyntheticTestDetailPage() {
 
       {/* Test Reports */}
       <div className="mt-8">
-        <h2 className="mb-4 font-semibold text-lg">Test Reports</h2>
+        <div className="mb-4 flex items-center gap-2">
+          <h2 className="font-semibold text-lg">Test Reports</h2>
+          <button
+            type="button"
+            onClick={handleRefreshReports}
+            disabled={reportsRefreshing}
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+            title="Refresh reports"
+          >
+            <RefreshCwIcon className={cn("size-4", reportsRefreshing && "animate-spin")} />
+          </button>
+        </div>
         {reportsLoading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

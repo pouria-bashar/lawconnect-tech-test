@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { makeAssistantToolUI, useThreadRuntime } from "@assistant-ui/react";
 import {
   Renderer,
@@ -86,6 +86,22 @@ function RenderWithJson({
   const [copied, setCopied] = useState(false);
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [store] = useState(() => createStateStore(spec.state ?? {}));
+
+  // During streaming, `state` arrives after `root`/`elements` so the store
+  // may have been created with `{}`. Sync state into the store once it lands.
+  const stateSyncedRef = useRef(false);
+  const stateFingerprint = useMemo(
+    () => (spec.state ? JSON.stringify(spec.state) : ""),
+    [spec.state],
+  );
+  useEffect(() => {
+    if (stateSyncedRef.current) return;
+    if (!spec.state || Object.keys(spec.state).length === 0) return;
+    for (const [key, value] of Object.entries(spec.state)) {
+      store.set(`/${key}`, value);
+    }
+    stateSyncedRef.current = true;
+  }, [stateFingerprint, store, spec.state]);
 
   return (
     <div className="my-4 w-full">
@@ -178,7 +194,7 @@ export const JsonRenderToolUI = makeAssistantToolUI<
         <div className="my-4 rounded-xl border bg-muted/30 p-6">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            Generating UI...
+            Generating Input form...
           </div>
         </div>
       );
@@ -186,18 +202,7 @@ export const JsonRenderToolUI = makeAssistantToolUI<
 
     const safeSpec = sanitizeSpec(spec);
 
-    // If we have a root but it hasn't been fully defined yet, show placeholder
-    if (!safeSpec.elements[safeSpec.root]) {
-      if (!loading) return null;
-      return (
-        <div className="my-4 rounded-xl border bg-muted/30 p-6">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            Generating UI...
-          </div>
-        </div>
-      );
-    }
+
 
     const handleSubmit = async (state: Record<string, unknown>) => {
       addResult({ success: true, formData: state });

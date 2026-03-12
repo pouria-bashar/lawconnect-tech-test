@@ -14,7 +14,7 @@ import TaskItem from "@tiptap/extension-task-item";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import Youtube from "@tiptap/extension-youtube";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { cn } from "@workspace/ui/lib/utils";
 import {
   BoldIcon,
@@ -307,18 +307,23 @@ function MenuBar({ editor }: { editor: Editor | null }) {
 export interface TiptapEditorProps {
   content: JSONContent;
   editable?: boolean;
+  streaming?: boolean;
   onEditorReady?: (editor: Editor) => void;
 }
 
 export function TiptapEditor({
   content,
   editable = true,
+  streaming = false,
   onEditorReady,
 }: TiptapEditorProps) {
+  // While streaming, keep editor non-editable to avoid toolbar re-renders
+  const isEditable = editable && !streaming;
+
   const editor = useEditor({
     extensions,
     content,
-    editable,
+    editable: isEditable,
     immediatelyRender: false,
     editorProps: {
       attributes: {
@@ -327,11 +332,21 @@ export function TiptapEditor({
     },
   });
 
-  // Update editor content when streaming new content
+  // Toggle editable state when streaming ends
   useEffect(() => {
-    if (editor && content) {
-      editor.commands.setContent(content);
+    if (editor) {
+      editor.setEditable(isEditable);
     }
+  }, [editor, isEditable]);
+
+  // Update editor content when streaming new content, but only if it actually changed
+  const lastContentJson = useRef<string>("");
+  useEffect(() => {
+    if (!editor || !content) return;
+    const json = JSON.stringify(content);
+    if (json === lastContentJson.current) return;
+    lastContentJson.current = json;
+    editor.commands.setContent(content, { emitUpdate: false });
   }, [editor, content]);
 
   // Notify parent when editor is ready
@@ -343,7 +358,7 @@ export function TiptapEditor({
 
   return (
     <>
-      <MenuBar editor={editor} />
+      {!streaming && <MenuBar editor={editor} />}
       <EditorContent editor={editor} />
     </>
   );
