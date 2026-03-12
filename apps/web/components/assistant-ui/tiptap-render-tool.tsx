@@ -3,7 +3,33 @@
 import { makeAssistantToolUI } from "@assistant-ui/react";
 import type { JSONContent } from "@tiptap/react";
 import { useEffect, useRef } from "react";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
+import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
+import Highlight from "@tiptap/extension-highlight";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import Subscript from "@tiptap/extension-subscript";
+import Superscript from "@tiptap/extension-superscript";
+import Youtube from "@tiptap/extension-youtube";
+import { renderToReactElement } from "@tiptap/static-renderer/pm/react";
 import { TiptapEditor } from "@/components/tiptap-editor";
+
+const staticExtensions = [
+  StarterKit,
+  Image,
+  Link.configure({ openOnClick: false }),
+  Underline,
+  TextAlign.configure({ types: ["heading", "paragraph"] }),
+  Highlight.configure({ multicolor: true }),
+  TaskList,
+  TaskItem.configure({ nested: true }),
+  Subscript,
+  Superscript,
+  Youtube,
+];
 
 function useAutoCompleteToolResult(
   status: { type: string },
@@ -17,6 +43,33 @@ function useAutoCompleteToolResult(
       addResultRef.current({ success: true });
     }
   }, [status.type]);
+}
+
+function sanitizeContent(node: JSONContent): JSONContent | null {
+  if (!node.type) return null;
+  if (!node.content) return node;
+  return {
+    ...node,
+    content: node.content
+      .map(sanitizeContent)
+      .filter((n): n is JSONContent => n !== null),
+  };
+}
+
+function StreamingPreview({ content }: { content: JSONContent }) {
+  const sanitized = sanitizeContent(content);
+  if (!sanitized) {
+    return <div className="min-h-[200px] px-4 py-3" />;
+  }
+  const rendered = renderToReactElement({
+    content: sanitized,
+    extensions: staticExtensions,
+  });
+  return (
+    <div className="tiptap prose prose-neutral dark:prose-invert min-h-[200px] px-4 py-3">
+      {rendered}
+    </div>
+  );
 }
 
 function TiptapBlogRenderer({
@@ -47,7 +100,11 @@ function TiptapBlogRenderer({
           </div>
         )}
       </div>
-      <TiptapEditor content={content} streaming={loading} />
+      {loading ? (
+        <StreamingPreview content={content} />
+      ) : (
+        <TiptapEditor content={content} />
+      )}
       {loading && (
         <div className="border-t px-4 py-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">

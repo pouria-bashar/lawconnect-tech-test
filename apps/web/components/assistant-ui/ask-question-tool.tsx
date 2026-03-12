@@ -4,6 +4,7 @@ import { useState } from "react";
 import { makeAssistantToolUI } from "@assistant-ui/react";
 import { useThreadRuntime } from "@assistant-ui/react";
 import { cn } from "@workspace/ui/lib/utils";
+import { addIntakeEntry } from "@/lib/intake-store";
 
 type Option = { label: string; value: string };
 
@@ -67,6 +68,13 @@ export const AskQuestionToolUI = makeAssistantToolUI<
       if (selected.has("other") && otherText) {
         selectedLabels.push(otherText);
       }
+
+      // Capture Q&A for lead save
+      addIntakeEntry({
+        question: question!,
+        answers: selectedLabels,
+        ...(selected.has("other") && otherText ? { otherText } : {}),
+      });
 
       // Complete the tool call
       addResult({

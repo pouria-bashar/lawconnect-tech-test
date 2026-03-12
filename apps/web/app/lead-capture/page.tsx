@@ -61,7 +61,7 @@ const WELCOME = (
 );
 
 export default function Page() {
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+  const [selectedModel, setSelectedModel] = useState("anthropic/claude-sonnet-4-5");
 
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({

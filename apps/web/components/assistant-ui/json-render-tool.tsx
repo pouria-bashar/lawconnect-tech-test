@@ -14,6 +14,7 @@ import {
 } from "@json-render/react";
 import { registry } from "@/lib/json-render";
 import { useSaveLead } from "@/hooks/use-save-lead";
+import { getIntakeEntries, clearIntakeEntries } from "@/lib/intake-store";
 import type { Spec } from "@json-render/core";
 
 /**
@@ -177,6 +178,8 @@ export const JsonRenderToolUI = makeAssistantToolUI<
     root: string;
     elements: Record<string, unknown>;
     state?: Record<string, unknown>;
+    legalArea?: string;
+    description?: string;
   },
   { success: boolean; formData?: Record<string, unknown> }
 >({
@@ -185,6 +188,8 @@ export const JsonRenderToolUI = makeAssistantToolUI<
     const runtime = useThreadRuntime();
     const { save: saveLead } = useSaveLead();
     const spec = args as Spec | undefined;
+    const legalArea = args?.legalArea;
+    const description = args?.description;
     const loading = status.type === "running";
 
     // No root or elements yet — show a loading placeholder
@@ -210,15 +215,24 @@ export const JsonRenderToolUI = makeAssistantToolUI<
       // The state store wraps fields under a "formData" key
       const intake = (state.formData ?? state) as Record<string, unknown>;
 
+      // Merge clarifying Q&A captured client-side
+      const intakeQuestions = getIntakeEntries();
+      clearIntakeEntries();
+
+      const intakeData = {
+        ...intake,
+        intakeQuestions,
+      };
+
       // Save the lead to the database
       try {
         await saveLead({
           name: (intake.fullName as string) ?? "",
           email: (intake.email as string) ?? "",
           phone: intake.phone as string | undefined,
-          legalArea: intake.legalCategory as string | undefined,
-          description: intake.situationDetails as string | undefined,
-          intakeData: intake,
+          legalArea: legalArea || undefined,
+          description: description || undefined,
+          intakeData,
         });
       } catch (error) {
         console.error("Failed to save lead:", error);
