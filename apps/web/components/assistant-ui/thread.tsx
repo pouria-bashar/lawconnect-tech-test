@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { type FC, type ReactNode, useEffect, useState } from "react";
 import { DEFAULT_MODEL, MODEL_OPTIONS } from "@/lib/model-config";
+import { ThemePicker } from "@/components/assistant-ui/theme-picker-tool";
 
 export type Suggestion = {
   prompt: string;
@@ -62,6 +63,8 @@ export type ThreadConfig = {
   composerPlaceholder?: string;
   selectedModel?: string;
   onModelChange?: (model: string) => void;
+  selectedTheme?: string;
+  onThemeChange?: (theme: string) => void;
   help?: HelpConfig;
 };
 
@@ -98,6 +101,8 @@ export const Thread: FC<{ config: ThreadConfig }> = ({ config }) => {
             placeholder={config.composerPlaceholder}
             selectedModel={config.selectedModel}
             onModelChange={config.onModelChange}
+            selectedTheme={config.selectedTheme}
+            onThemeChange={config.onThemeChange}
             help={config.help}
           />
         </ThreadPrimitive.ViewportFooter>
@@ -175,8 +180,10 @@ const Composer: FC<{
   placeholder?: string;
   selectedModel?: string;
   onModelChange?: (model: string) => void;
+  selectedTheme?: string;
+  onThemeChange?: (theme: string) => void;
   help?: HelpConfig;
-}> = ({ placeholder, selectedModel, onModelChange, help }) => {
+}> = ({ placeholder, selectedModel, onModelChange, selectedTheme, onThemeChange, help }) => {
   return (
     <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-2xl border border-input bg-background px-1 pt-2 outline-none transition-shadow has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-ring/20">
       <ComposerPrimitive.Input
@@ -189,6 +196,8 @@ const Composer: FC<{
       <ComposerAction
         selectedModel={selectedModel}
         onModelChange={onModelChange}
+        selectedTheme={selectedTheme}
+        onThemeChange={onThemeChange}
         help={help}
       />
     </ComposerPrimitive.Root>
@@ -198,8 +207,10 @@ const Composer: FC<{
 const ComposerAction: FC<{
   selectedModel?: string;
   onModelChange?: (model: string) => void;
+  selectedTheme?: string;
+  onThemeChange?: (theme: string) => void;
   help?: HelpConfig;
-}> = ({ selectedModel, onModelChange, help }) => {
+}> = ({ selectedModel, onModelChange, selectedTheme, onThemeChange, help }) => {
   return (
     <div className="aui-composer-action-wrapper relative mx-2 mb-2 flex items-center justify-between">
       <div className="flex items-center gap-1">
@@ -224,6 +235,12 @@ const ComposerAction: FC<{
               )}
             </DialogContent>
           </Dialog>
+        )}
+        {onThemeChange && selectedTheme && (
+          <ThemePicker
+            selectedTheme={selectedTheme}
+            onThemeChange={onThemeChange}
+          />
         )}
         {onModelChange && (
           <select

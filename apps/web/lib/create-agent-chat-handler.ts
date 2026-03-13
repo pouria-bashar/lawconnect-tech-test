@@ -6,13 +6,16 @@ import { mastra } from "@/mastra";
 
 export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "syntheticTestAgent" | "immigrationResearchAgent" | "codingAgent") {
   return async function POST(req: Request) {
-    const { messages, modelId } = await req.json();
+    const { messages, modelId, themeId } = await req.json();
 
     const agent = mastra.getAgent(agentName);
 
     const requestContext = new RequestContext();
     if (modelId) {
       requestContext.set(MODEL_ID_KEY, modelId);
+    }
+    if (themeId) {
+      requestContext.set("themeId", themeId);
     }
 
     const stream = await agent.stream(messages, { requestContext });

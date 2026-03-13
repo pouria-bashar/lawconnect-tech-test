@@ -21,7 +21,7 @@ const registryDef = defineRegistry(generativeUiCatalog, {
   components: {
     ...shadcnComponents,
     // Override Card to ensure padding and className passthrough
-    Card: ({ props, children }: { props: Record<string, any>; children: React.ReactNode }) => {
+    Card: ({ props, children }: { props: Record<string, any>; children?: React.ReactNode }) => {
       return (
         <Card className={cn("w-full", props.centered && "mx-auto", ...cls(props))}>
           {(props.title || props.description) && (

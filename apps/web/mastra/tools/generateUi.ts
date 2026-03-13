@@ -30,6 +30,12 @@ export const generateUiTool = createTool({
       .record(z.string(), z.unknown())
       .optional()
       .describe("Initial state for the UI"),
+    themeId: z
+      .string()
+      .optional()
+      .describe(
+        "Theme preset ID from the select_theme tool. When provided, the rendered UI will be wrapped in the theme's CSS variables so Tailwind classes like bg-primary, text-accent-foreground etc. use the theme's colors.",
+      ),
   }),
   outputSchema: z.object({
     success: z.boolean(),

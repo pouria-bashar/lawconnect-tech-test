@@ -13,7 +13,26 @@ import {
   useActions,
 } from "@json-render/react";
 import { generativeUiRegistry } from "@/lib/generative-ui-registry";
+import { defaultPresets } from "@workspace/ui/lib/theme-preset";
 import type { Spec } from "@json-render/core";
+
+/**
+ * Build inline CSS custom properties from a theme preset so that
+ * Tailwind classes like bg-primary, text-accent-foreground etc.
+ * resolve to the theme's palette inside this container.
+ */
+function buildThemeVars(themeId: string | undefined): React.CSSProperties {
+  if (!themeId || !defaultPresets[themeId]) return {};
+  const palette = defaultPresets[themeId].styles.light;
+  const vars: Record<string, string> = {};
+  for (const [key, value] of Object.entries(palette)) {
+    // Skip non-color properties
+    if (key === "radius" || key.startsWith("font-")) continue;
+    vars[`--${key}`] = value;
+  }
+  if (palette.radius) vars["--radius"] = palette.radius;
+  return vars as React.CSSProperties;
+}
 
 /**
  * Sanitize a (possibly partial) spec for safe rendering.
@@ -72,10 +91,12 @@ function RenderWithJson({
   spec,
   loading,
   onSubmit,
+  themeId,
 }: {
   spec: Spec;
   loading: boolean;
   onSubmit?: (state: Record<string, unknown>) => void;
+  themeId?: string;
 }) {
   const [showJson, setShowJson] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -96,8 +117,10 @@ function RenderWithJson({
     stateSyncedRef.current = true;
   }, [stateFingerprint, store, spec.state]);
 
+  const themeVars = useMemo(() => buildThemeVars(themeId), [themeId]);
+
   return (
-    <div className="my-4 w-full rounded-xl border bg-background p-4 sm:p-6">
+    <div className="my-4 w-full rounded-xl border bg-background p-4 sm:p-6" style={themeVars}>
       <StateProvider store={store}>
         <VisibilityProvider>
           <ValidationProvider>
@@ -170,12 +193,13 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
     root: string;
     elements: Record<string, unknown>;
     state?: Record<string, unknown>;
+    themeId?: string;
   },
   { success: boolean; formData?: Record<string, unknown> }
 >({
   toolName: "generate_ui",
   render: ({ args, status, addResult }) => {
-    const spec = args as Spec | undefined;
+    const spec = args as (Spec & { themeId?: string }) | undefined;
     const loading = status.type === "running";
 
     if (!spec?.root || !spec?.elements) {
@@ -202,6 +226,7 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
         spec={safeSpec}
         loading={loading}
         onSubmit={handleSubmit}
+        themeId={spec?.themeId}
       />
     );
   },

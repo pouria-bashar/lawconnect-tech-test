@@ -1,4 +1,4 @@
-export const defaultPresets: Record<string, { label: string; styles: { light: Record<string, string>; dark: Record<string, string> } }> = {
+export const defaultPresets: Record<string, { label: string; createdAt?: string; styles: { light: Record<string, string>; dark: Record<string, string> } }> = {
   "modern-minimal": {
     label: "Modern Minimal",
     styles: {

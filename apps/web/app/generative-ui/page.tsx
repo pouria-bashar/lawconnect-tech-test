@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { DEFAULT_MODEL } from "@/lib/model-config";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import {
   useChatRuntime,
@@ -10,6 +9,7 @@ import {
 import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
 import { GenerativeUiToolUI } from "@/components/assistant-ui/generative-ui-tool";
+import { DEFAULT_MODEL } from "@/lib/model-config";
 
 const SUGGESTIONS: Suggestion[] = [
   {
@@ -46,12 +46,13 @@ const WELCOME = (
 );
 
 export default function Page() {
-  const [selectedModel, setSelectedModel] = useState("anthropic/claude-sonnet-4-5");
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+  const [selectedTheme, setSelectedTheme] = useState("modern-minimal");
 
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: "/api/generative-ui/chat",
-      body: { modelId: selectedModel },
+      body: { modelId: selectedModel, themeId: selectedTheme },
     }),
   });
 
@@ -67,6 +68,8 @@ export default function Page() {
             composerPlaceholder: "Describe the UI you want to build...",
             selectedModel,
             onModelChange: setSelectedModel,
+            selectedTheme,
+            onThemeChange: setSelectedTheme,
           }}
         />
       </div>
