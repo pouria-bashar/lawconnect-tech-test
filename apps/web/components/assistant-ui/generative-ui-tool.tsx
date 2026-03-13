@@ -190,43 +190,49 @@ function RenderWithJson({
 
 export const GenerativeUiToolUI = makeAssistantToolUI<
   {
+    instructions: string;
+    themeId?: string;
+  },
+  {
     root: string;
     elements: Record<string, unknown>;
     state?: Record<string, unknown>;
     themeId?: string;
-  },
-  { success: boolean; formData?: Record<string, unknown> }
+  }
 >({
-  toolName: "generate_ui",
-  render: ({ args, status, addResult }) => {
-    const spec = args as (Spec & { themeId?: string }) | undefined;
+  toolName: "build_ui",
+  render: ({ args, result, status }) => {
     const loading = status.type === "running";
 
-    if (!spec?.root || !spec?.elements) {
-      if (!loading) return null;
+    // While the tool is running (Claude Code executing in E2B), show loading
+    if (!result) {
       return (
         <div className="my-4 rounded-xl border bg-muted/30 p-6">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            Generating UI...
+            {loading
+              ? "Claude Code is generating your UI..."
+              : "Waiting for result..."}
           </div>
+          {args?.instructions && (
+            <p className="mt-2 text-xs text-muted-foreground/70 line-clamp-2">
+              {args.instructions}
+            </p>
+          )}
         </div>
       );
     }
 
-    const safeSpec = sanitizeSpec(spec);
+    const spec = result as (Spec & { themeId?: string }) | undefined;
+    if (!spec?.root || !spec?.elements) return null;
 
-    const handleSubmit = (state: Record<string, unknown>) => {
-      const formData = (state.formData ?? state) as Record<string, unknown>;
-      addResult({ success: true, formData });
-    };
+    const safeSpec = sanitizeSpec(spec);
 
     return (
       <RenderWithJson
         spec={safeSpec}
-        loading={loading}
-        onSubmit={handleSubmit}
-        themeId={spec?.themeId}
+        loading={false}
+        themeId={spec.themeId}
       />
     );
   },

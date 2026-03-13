@@ -18,8 +18,12 @@ export async function runClaudeCode(instruction: string): Promise<RunResult> {
     const escaped = `${instruction}`.replace(/'/g, "'\\''")
     const command = `claude -p '${escaped}' --dangerously-skip-permissions --output-format stream-json --verbose --continue`
     // Run the test
-    const result = await sbx.commands.run(command, { timeoutMs: 60_000 })
+    const result = await sbx.commands.run(command, { timeoutMs: 60_000, onStderr(data) {
+        console.log(data);
+    }, })
 
+    console.log(result, '>>>>>>');
+    
     const durationMs = Date.now() - start
 
     return {
@@ -29,6 +33,8 @@ export async function runClaudeCode(instruction: string): Promise<RunResult> {
       durationMs,
     }
   } catch (error: unknown) {
+    console.log(JSON.stringify(error),'????');
+    
     const durationMs = Date.now() - start
     const err = error as { stdout?: string; stderr?: string; message?: string }
 

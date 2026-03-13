@@ -12,7 +12,8 @@
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "remotion:studio": "remotion studio remotion-compositions/index.ts",
-    "remotion:render": "remotion render remotion-compositions/index.ts MyComposition out.mp4"
+    "remotion:render": "remotion render remotion-compositions/index.ts MyComposition out.mp4",
+    "build:template": "npx tsx@latest --env-file=.env.local lib/e2b/templates/build.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.58",
@@ -21,6 +22,7 @@
     "@assistant-ui/react": "^0.12.16",
     "@assistant-ui/react-ai-sdk": "^1.3.13",
     "@assistant-ui/react-markdown": "^0.12.5",
+    "@e2b/code-interpreter": "^2.3.3",
     "@json-render/core": "^0.12.0",
     "@json-render/react": "^0.12.0",
     "@json-render/react-pdf": "^0.12.0",

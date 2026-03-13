@@ -12,8 +12,8 @@ export async function getSandbox(): Promise<Sandbox> {
     process.env.E2B_SANDBOX_TIMEOUT || String(FIFTEEN_MINUTES),
     10,
   );
-  const template = process.env.E2B_TEMPLATE || "sandterm-mcp-gateway";
-  const sandboxId = process.env.E2B_SANDBOX_ID || "synthetic-test";
+  const template = process.env.E2B_TEMPLATE || "ui-generator-template";
+  const sandboxId = process.env.E2B_SANDBOX_ID || "ui-generator";
 
   // Find existing sandbox by metadata
   const paginator = await Sandbox.list({
@@ -37,5 +37,9 @@ export async function getSandbox(): Promise<Sandbox> {
     apiKey,
     timeoutMs: timeout,
     metadata: { id: sandboxId },
-  });
+    envs: {
+      GEMINI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
+      CLAUDE_CODE_OAUTH_TOKEN: process.env.CLAUDE_CODE_OAUTH_TOKEN!,
+    },
+  })
 }

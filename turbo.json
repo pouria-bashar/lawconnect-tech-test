@@ -11,7 +11,8 @@
     "E2B_TEMPLATE",
     "E2B_SANDBOX_TIMEOUT",
     "E2B_SANDBOX_ID",
-    "CRON_SECRET"
+    "CRON_SECRET",
+    "CLAUDE_CODE_OAUTH_TOKEN"
   ],
   "tasks": {
     "build": {
