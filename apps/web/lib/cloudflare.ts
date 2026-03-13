@@ -102,7 +102,7 @@ export default {
 
   const deployFormData = new FormData();
   const metadata = {
-    main_module: "worker.mjs",
+    main_module: `${name}.mjs`,
     compatibility_date: "2025-01-24",
     assets: { jwt: completionToken },
     bindings: [{ type: "assets", name: "ASSETS" }],
@@ -113,8 +113,8 @@ export default {
     new Blob([JSON.stringify(metadata)], { type: "application/json" }),
   );
   deployFormData.append(
-    "worker.mjs",
-    new File([workerCode], "worker.mjs", { type: "application/javascript+module" }),
+    `${name}.mjs`,
+    new File([workerCode], `${name}.mjs`, { type: "application/javascript+module" }),
   );
 
   const deployRes = await fetch(
