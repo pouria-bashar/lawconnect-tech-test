@@ -28,7 +28,7 @@ export const e2bAttachmentAdapter: AttachmentAdapter = {
 
     if (!res.ok) throw new Error("Failed to upload file");
 
-    const { path, name } = await res.json();
+    const { name } = await res.json();
 
     return {
       ...attachment,
@@ -36,7 +36,7 @@ export const e2bAttachmentAdapter: AttachmentAdapter = {
       content: [
         {
           type: "text" as const,
-          text: `[Uploaded file: ${name} → sandbox path: ${path}]`,
+          text: `[Attached file: ${name}]`,
         },
       ],
     };

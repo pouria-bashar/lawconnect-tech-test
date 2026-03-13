@@ -16,8 +16,19 @@ export const buildUiTool = createTool({
   outputSchema: z.object({
     url: z.string().describe("URL to the generated HTML file"),
   }),
-  execute: async (input) => {
-    const result = await runClaudeCode(input.instructions);
+  execute: async (input, context) => {
+    const processId = context?.toolCallId ?? crypto.randomUUID();
+
+    const result = await runClaudeCode(input.instructions, {
+      processId,
+      onEvent: (event) => {
+        void context?.writer?.custom({
+          type: "data-build-progress",
+          data: event,
+          transient: true,
+        });
+      },
+    });
 
     if (result.status === "error") {
       throw new Error(`Claude Code failed: ${result.errors}`);

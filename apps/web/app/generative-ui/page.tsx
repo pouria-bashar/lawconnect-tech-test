@@ -8,7 +8,7 @@ import {
 } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
-import { GenerativeUiToolUI } from "@/components/assistant-ui/generative-ui-tool";
+import { GenerativeUiToolUI, BuildProgressDataUI } from "@/components/assistant-ui/generative-ui-tool";
 import { DEFAULT_MODEL } from "@/lib/model-config";
 import { e2bAttachmentAdapter } from "@/lib/e2b-attachment-adapter";
 
@@ -63,6 +63,7 @@ export default function Page() {
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <GenerativeUiToolUI />
+      <BuildProgressDataUI />
       <div className="relative h-[calc(100dvh-3rem)]">
         <Thread
           config={{
