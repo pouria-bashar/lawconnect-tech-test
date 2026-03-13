@@ -1,4 +1,4 @@
-import { getSandbox } from "./sandbox"
+import { getSandbox } from "@workspace/e2b/sandbox"
 
 export interface RunResult {
   status: "pass" | "fail" | "error"
@@ -18,7 +18,7 @@ export async function runClaudeCode(instruction: string): Promise<RunResult> {
     const escaped = `${instruction}`.replace(/'/g, "'\\''")
     const command = `claude -p '${escaped}' --dangerously-skip-permissions --output-format stream-json --verbose --continue`
     // Run the test
-    const result = await sbx.commands.run(command, { timeoutMs: 60_000, onStderr(data) {
+    const result = await sbx.commands.run(command, { timeoutMs: 120_000, onStderr(data) {
         console.log(data);
     }, })
 

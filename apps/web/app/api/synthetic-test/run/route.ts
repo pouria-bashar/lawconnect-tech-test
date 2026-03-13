@@ -1,4 +1,4 @@
-import { runCode } from "@/lib/e2b/run-code";
+import { runCode } from "@workspace/e2b/run-code";
 import { getTestById } from "@workspace/db/queries/synthetic-test";
 import { saveTestReport } from "@workspace/db/queries/synthetic-test";
 import { NextResponse } from "next/server";

@@ -1,4 +1,4 @@
-import { runCode } from "@/lib/e2b/run-code";
+import { runCode } from "@workspace/e2b/run-code";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 120;

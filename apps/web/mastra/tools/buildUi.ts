@@ -1,4 +1,4 @@
-import { runClaudeCode } from "@/lib/e2b/run-claude-code";
+import { runClaudeCode } from "@workspace/e2b/run-claude-code";
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 

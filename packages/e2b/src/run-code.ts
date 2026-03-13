@@ -1,4 +1,4 @@
-import { getSandbox } from "./sandbox";
+import { getSandbox } from "@workspace/e2b/sandbox";
 
 export interface RunResult {
   status: "pass" | "fail" | "error";

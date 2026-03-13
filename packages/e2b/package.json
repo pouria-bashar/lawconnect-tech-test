@@ -1,0 +1,24 @@
+{
+  "name": "@workspace/e2b",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build:template": "npx tsx@latest --env-file=../../apps/web/.env.local src/templates/build.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@e2b/code-interpreter": "^2.3.3",
+    "e2b": "^2.14.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.1.0",
+    "@workspace/typescript-config": "workspace:*",
+    "typescript": "^5.9.3"
+  },
+  "exports": {
+    "./sandbox": "./src/sandbox.ts",
+    "./run-claude-code": "./src/run-claude-code.ts",
+    "./run-code": "./src/run-code.ts"
+  }
+}
