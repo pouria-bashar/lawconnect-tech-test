@@ -8,7 +8,7 @@ import {
 } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
-import { GenerativeUiToolUI } from "@/components/assistant-ui/generative-ui-tool";
+import { GenerativeUiToolUI, ThemeProvider } from "@/components/assistant-ui/generative-ui-tool";
 import { DEFAULT_MODEL } from "@/lib/model-config";
 
 const SUGGESTIONS: Suggestion[] = [
@@ -58,8 +58,9 @@ export default function Page() {
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <GenerativeUiToolUI />
-      <div className="relative h-[calc(100dvh-3rem)]">
+      <ThemeProvider value={selectedTheme}>
+        <GenerativeUiToolUI />
+        <div className="relative h-[calc(100dvh-3rem)]">
         <Thread
           config={{
             maxWidth: "64rem",
@@ -73,6 +74,7 @@ export default function Page() {
           }}
         />
       </div>
+      </ThemeProvider>
     </AssistantRuntimeProvider>
   );
 }

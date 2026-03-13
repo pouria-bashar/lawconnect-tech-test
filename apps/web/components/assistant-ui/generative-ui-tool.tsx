@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { createContext, useContext, useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useTheme } from "next-themes";
 import { makeAssistantToolUI } from "@assistant-ui/react";
 import {
   Renderer,
@@ -16,17 +17,20 @@ import { generativeUiRegistry } from "@/lib/generative-ui-registry";
 import { defaultPresets } from "@workspace/ui/lib/theme-preset";
 import type { Spec } from "@json-render/core";
 
+const ThemeContext = createContext<string>("modern-minimal");
+export const ThemeProvider = ThemeContext.Provider;
+
 /**
  * Build inline CSS custom properties from a theme preset so that
  * Tailwind classes like bg-primary, text-accent-foreground etc.
  * resolve to the theme's palette inside this container.
  */
-function buildThemeVars(themeId: string | undefined): React.CSSProperties {
+function buildThemeVars(themeId: string | undefined, mode: "light" | "dark" = "light"): React.CSSProperties {
   if (!themeId || !defaultPresets[themeId]) return {};
-  const palette = defaultPresets[themeId].styles.light;
+  const preset = defaultPresets[themeId].styles;
+  const palette = preset[mode] ?? preset.light;
   const vars: Record<string, string> = {};
   for (const [key, value] of Object.entries(palette)) {
-    // Skip non-color properties
     if (key === "radius" || key.startsWith("font-")) continue;
     vars[`--${key}`] = value;
   }
@@ -117,10 +121,12 @@ function RenderWithJson({
     stateSyncedRef.current = true;
   }, [stateFingerprint, store, spec.state]);
 
-  const themeVars = useMemo(() => buildThemeVars(themeId), [themeId]);
+  const { resolvedTheme } = useTheme();
+  const mode = resolvedTheme === "dark" ? "dark" : "light";
+  const themeVars = useMemo(() => buildThemeVars(themeId, mode), [themeId, mode]);
 
   return (
-    <div className="my-4 w-full rounded-xl border bg-background p-4 sm:p-6" style={themeVars}>
+    <div className="my-4 w-full rounded-xl border bg-background text-foreground p-4 sm:p-6" style={themeVars}>
       <StateProvider store={store}>
         <VisibilityProvider>
           <ValidationProvider>
@@ -201,7 +207,8 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
   }
 >({
   toolName: "build_ui",
-  render: ({ args, result, status }) => {
+  render: function GenerativeUiRender({ args, result, status }) {
+    const currentTheme = useContext(ThemeContext);
     const loading = status.type === "running";
 
     // While the tool is running (Claude Code executing in E2B), show loading
@@ -232,7 +239,7 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
       <RenderWithJson
         spec={safeSpec}
         loading={false}
-        themeId={spec.themeId}
+        themeId={currentTheme}
       />
     );
   },

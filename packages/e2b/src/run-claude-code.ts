@@ -10,7 +10,6 @@ export interface RunResult {
 // /Users/pouria/Documents/sustainbit/PropSight-master/apps/backoffice/src/mastra/lib/run-coding-agent.ts
 
 export async function runClaudeCode(instruction: string): Promise<RunResult> {
-  
   const start = Date.now()
   try {
     const sbx = await getSandbox()
@@ -18,12 +17,18 @@ export async function runClaudeCode(instruction: string): Promise<RunResult> {
     const escaped = `${instruction}`.replace(/'/g, "'\\''")
     const command = `claude -p '${escaped}' --dangerously-skip-permissions --output-format stream-json --verbose --continue`
     // Run the test
-    const result = await sbx.commands.run(command, { timeoutMs: 120_000, onStderr(data) {
-        console.log(data);
-    }, })
+    const result = await sbx.commands.run(command, {
+      timeoutMs: 120_000,
+      onStdout: (data) => {
+        console.log(data)
+      },
+      onStderr(data) {
+        console.log(data)
+      },
+    })
 
-    console.log(result, '>>>>>>');
-    
+    console.log(result, ">>>>>>")
+
     const durationMs = Date.now() - start
 
     return {
@@ -33,8 +38,8 @@ export async function runClaudeCode(instruction: string): Promise<RunResult> {
       durationMs,
     }
   } catch (error: unknown) {
-    console.log(JSON.stringify(error),'????');
-    
+    console.log(JSON.stringify(error), "????")
+
     const durationMs = Date.now() - start
     const err = error as { stdout?: string; stderr?: string; message?: string }
 

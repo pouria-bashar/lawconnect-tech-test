@@ -35,12 +35,39 @@ Output ONLY a valid JSON object — no markdown, no explanations, no code blocks
 - To display a list of strings, use repeat on a Stack with a Badge child using { "$item": "$value" }.
 - For arrays of objects, use { "$item": "fieldName" } inside repeated children.
 
-## Styling — Tailwind semantic classes via className arrays
-- Backgrounds: bg-background, bg-card, bg-primary, bg-secondary, bg-muted, bg-accent, bg-destructive
-- Text: text-foreground, text-primary-foreground, text-secondary-foreground, text-muted-foreground, text-accent-foreground
-- Borders: border-border, border-input, border-primary, border-accent
-- Examples: ["bg-primary", "text-primary-foreground", "rounded-xl", "shadow-md"]
-- Gradients: ["bg-gradient-to-br", "from-primary/10", "to-accent/20"]
-- Opacity: bg-primary/10, text-primary/80, border-accent/30
+## Styling — ONLY semantic Tailwind classes via className arrays
+
+CRITICAL: You MUST ONLY use semantic/theme CSS classes. NEVER use hardcoded color classes.
+
+### FORBIDDEN (never use these):
+- Hardcoded colors: bg-white, bg-black, bg-slate-900, bg-gray-50, text-white, text-black, text-gray-600, etc.
+- Hardcoded color gradients: from-violet-500, to-pink-500, from-indigo-600, via-purple-600, etc.
+- Hardcoded color borders: border-violet-200, border-cyan-200, etc.
+- Hardcoded color shadows: shadow-violet-100, shadow-cyan-200, etc.
+- ANY Tailwind color with a specific hue name (red, blue, green, violet, pink, slate, gray, zinc, etc.)
+
+### ALLOWED (use only these for colors):
+- Backgrounds: bg-background, bg-card, bg-primary, bg-secondary, bg-muted, bg-accent, bg-destructive, bg-popover
+- Text: text-foreground, text-primary-foreground, text-secondary-foreground, text-muted-foreground, text-accent-foreground, text-destructive-foreground, text-card-foreground, text-popover-foreground
+- Borders: border-border, border-input, border-primary, border-accent, border-destructive
+- Gradients: use semantic colors with opacity — ["bg-gradient-to-br", "from-primary/10", "to-accent/20"]
+- Opacity variants: bg-primary/10, text-primary/80, border-accent/30, bg-muted/50
+- Non-color utilities are fine: rounded-xl, shadow-md, shadow-lg, p-8, text-lg, font-bold, etc.
+
+### Pairing rules:
+- bg-background → text-foreground
+- bg-card → text-card-foreground
+- bg-primary → text-primary-foreground
+- bg-secondary → text-secondary-foreground
+- bg-muted → text-muted-foreground
+- bg-accent → text-accent-foreground
+- bg-destructive → text-destructive-foreground
+
+### Examples:
+- Hero section: ["bg-primary", "text-primary-foreground", "py-24", "px-8"]
+- Feature card: ["bg-card", "text-card-foreground", "p-8", "rounded-2xl", "border", "border-border", "shadow-lg"]
+- CTA section: ["bg-accent", "text-accent-foreground", "py-24", "px-8"]
+- Footer: ["bg-secondary", "text-secondary-foreground", "py-16", "px-8"]
+- Gradient hero: ["bg-gradient-to-br", "from-primary", "to-accent", "text-primary-foreground", "py-24"]
 
 CRITICAL: Output ONLY the raw JSON object. No markdown code fences, no explanations. Just the JSON.

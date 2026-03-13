@@ -22,11 +22,5 @@ export const mastra = new Mastra({
     codingAgent,
   },
   storage,
-  
-  // server: {
-  //   auth: new MastraAuthSupabase({
-  //     url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  //     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  //   }),
-  // },
+
 })
