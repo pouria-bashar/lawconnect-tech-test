@@ -1,8 +1,8 @@
 import { Agent } from "@mastra/core/agent";
 import { getModelFromContext } from "@/lib/model-config";
-import { renderTestTool } from "../tools/renderTest";
-import { saveTestTool } from "../tools/saveTest";
-import { findTestTool } from "../tools/findTest";
+import { renderTestTool } from "../tools/render_test";
+import { saveTestTool } from "../tools/save_test";
+import { findTestTool } from "../tools/find_test";
 
 export const syntheticTestAgent = new Agent({
   id: "synthetic-test-agent",

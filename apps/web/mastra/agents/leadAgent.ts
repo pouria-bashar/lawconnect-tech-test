@@ -1,9 +1,9 @@
 import { Agent } from "@mastra/core/agent";
 import { getModelFromContext } from "@/lib/model-config";
 import { toolPrompt } from "@/lib/json-render-catalog";
-import { renderUiTool } from "../tools/renderUi";
-import { findLawyerTool } from "../tools/findLawyer";
-import { askQuestionTool } from "../tools/askQuestion";
+import { renderUiTool } from "../tools/render_ui";
+import { findLawyerTool } from "../tools/find_lawyer";
+import { askQuestionTool } from "../tools/ask_question";
 
 const uiReference = toolPrompt({
   customRules: [

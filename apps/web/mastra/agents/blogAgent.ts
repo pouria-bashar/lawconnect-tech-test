@@ -1,8 +1,8 @@
 import { Agent } from "@mastra/core/agent";
 import { getModelFromContext } from "@/lib/model-config";
-import { renderBlogTool } from "../tools/renderBlog";
-import { saveBlogTool } from "../tools/saveBlog";
-import { askQuestionTool } from "../tools/askQuestion";
+import { renderBlogTool } from "../tools/render_blog";
+import { saveBlogTool } from "../tools/save_blog";
+import { askQuestionTool } from "../tools/ask_question";
 
 export const blogAgent = new Agent({
   id: "blog-agent",
