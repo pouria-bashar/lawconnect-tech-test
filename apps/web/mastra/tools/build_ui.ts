@@ -17,7 +17,7 @@ export const buildUiTool = createTool({
     url: z.string().describe("URL to the generated HTML file"),
   }),
   execute: async (input, context) => {
-    const processId = context?.toolCallId ?? crypto.randomUUID();
+    const processId = context?.agent?.toolCallId ?? crypto.randomUUID();
 
     const result = await runClaudeCode(input.instructions, {
       processId,

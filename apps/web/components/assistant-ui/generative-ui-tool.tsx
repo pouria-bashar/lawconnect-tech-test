@@ -171,8 +171,33 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
   render: function GenerativeUiRender({ result, status, toolCallId }) {
     const [isExpanded, setIsExpanded] = useState(true);
     const [cancelling, setCancelling] = useState(false);
+    const [deploying, setDeploying] = useState(false);
+    const [deployResult, setDeployResult] = useState<{ url: string; scriptName: string } | null>(null);
+    const [showDeployDialog, setShowDeployDialog] = useState(false);
+    const [deployError, setDeployError] = useState<string | null>(null);
     const loading = status.type === "running";
     const events = useBuildProgress(loading);
+
+    const handleDeploy = useCallback(async () => {
+      if (!result?.url || deploying) return;
+      setDeploying(true);
+      setDeployError(null);
+      try {
+        const res = await fetch("/api/generative-ui/deploy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: result.url }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Deployment failed");
+        setDeployResult({ url: data.url, scriptName: data.scriptName });
+        setShowDeployDialog(true);
+      } catch (e) {
+        setDeployError(e instanceof Error ? e.message : "Deployment failed");
+      } finally {
+        setDeploying(false);
+      }
+    }, [result?.url, deploying]);
 
     const handleCancel = useCallback(async () => {
       if (!toolCallId || cancelling) return;
@@ -186,7 +211,7 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
 
     if (!result) {
       return (
-        <div className="my-4 rounded-xl border bg-muted/30 p-4">
+        <div className="my-8 rounded-xl border bg-muted/30 p-4">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -210,7 +235,7 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
     if (!result.url) return null;
 
     return (
-      <div className="my-4 w-full">
+      <div className="my-8 w-full">
         {events.length > 0 && <BuildProgress events={events} />}
         <div className="flex items-center justify-between mb-2 mt-2">
           <button
@@ -221,15 +246,98 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
             <ChevronIcon open={isExpanded} />
             {isExpanded ? "Collapse" : "Expand"} preview
           </button>
-          <a
-            href={result.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Open in new tab &rarr;
-          </a>
+          <div className="flex items-center gap-2">
+            {deployResult ? (
+              <button
+                type="button"
+                onClick={() => setShowDeployDialog(true)}
+                className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
+              >
+                Deployed
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleDeploy}
+                disabled={deploying}
+                className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+              >
+                {deploying ? (
+                  <>
+                    <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Deploying...
+                  </>
+                ) : (
+                  "Deploy"
+                )}
+              </button>
+            )}
+            <a
+              href={result.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Open in new tab &rarr;
+            </a>
+          </div>
         </div>
+        {deployError && (
+          <p className="text-xs text-destructive mb-2">{deployError}</p>
+        )}
+        {showDeployDialog && deployResult && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setShowDeployDialog(false)}
+            />
+            <div className="relative z-10 w-full max-w-md rounded-xl border bg-background p-6 shadow-lg">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Deployment Successful</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowDeployDialog(false)}
+                  className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Your UI has been deployed to Cloudflare Workers.
+              </p>
+              <div className="rounded-lg border bg-muted/30 p-3 mb-4">
+                <p className="text-xs text-muted-foreground mb-1">Deployment URL</p>
+                <a
+                  href={deployResult.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-primary break-all hover:underline"
+                >
+                  {deployResult.url}
+                </a>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeployDialog(false)}
+                  className="rounded-md border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
+                >
+                  Close
+                </button>
+                <a
+                  href={deployResult.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  Open site &rarr;
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
         {isExpanded && (
           <iframe
             src={result.url}

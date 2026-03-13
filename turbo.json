@@ -12,7 +12,10 @@
     "E2B_SANDBOX_TIMEOUT",
     "E2B_SANDBOX_ID",
     "CRON_SECRET",
-    "CLAUDE_CODE_OAUTH_TOKEN"
+    "CLAUDE_CODE_OAUTH_TOKEN",
+    "CF_API_TOKEN",
+    "CF_ACCOUNT_ID",
+    "CF_DISPATCH_NAMESPACE"
   ],
   "tasks": {
     "build": {
