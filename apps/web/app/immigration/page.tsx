@@ -46,7 +46,7 @@ const WELCOME = (
 );
 
 export default function Page() {
-  const [selectedModel, setSelectedModel] = useState("anthropic/claude-sonnet-4-5");
+  const [selectedModel, setSelectedModel] = useState("google/gemini-2.5-flash")
 
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
