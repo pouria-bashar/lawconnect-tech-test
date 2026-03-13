@@ -1,5 +1,7 @@
 import {
   UserMessageAttachments,
+  ComposerAttachments,
+  ComposerAddAttachment,
 } from "@/components/assistant-ui/attachment";
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
@@ -186,6 +188,7 @@ const Composer: FC<{
 }> = ({ placeholder, selectedModel, onModelChange, selectedTheme, onThemeChange, help }) => {
   return (
     <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-2xl border border-input bg-background px-1 pt-2 outline-none transition-shadow has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-ring/20">
+      <ComposerAttachments />
       <ComposerPrimitive.Input
         placeholder={placeholder ?? "Type a message..."}
         className="aui-composer-input mb-1 max-h-32 min-h-14 w-full resize-none bg-transparent px-4 pt-2 pb-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-0"
@@ -214,6 +217,7 @@ const ComposerAction: FC<{
   return (
     <div className="aui-composer-action-wrapper relative mx-2 mb-2 flex items-center justify-between">
       <div className="flex items-center gap-1">
+        <ComposerAddAttachment />
         {help && (
           <Dialog>
             <DialogTrigger asChild>

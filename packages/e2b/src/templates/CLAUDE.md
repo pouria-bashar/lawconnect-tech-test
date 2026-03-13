@@ -21,6 +21,10 @@ Write a single HTML file to `/home/user/output.html`. The file must be completel
 - Do NOT reference any local files or external assets that require bundling
 - The HTML should render correctly when opened standalone in a browser
 
+## Uploaded Files
+
+Users may upload files (resumes, images, PDFs, documents, etc.) before requesting a UI. These files are available at `/home/user/uploads/`. When the instructions reference an uploaded file, read it and use its content to generate the UI.
+
 ## Rules
 
 - Write the complete HTML file using the Write tool to `/home/user/output.html`

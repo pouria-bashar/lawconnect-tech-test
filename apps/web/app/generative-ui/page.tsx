@@ -10,6 +10,7 @@ import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
 import { GenerativeUiToolUI } from "@/components/assistant-ui/generative-ui-tool";
 import { DEFAULT_MODEL } from "@/lib/model-config";
+import { e2bAttachmentAdapter } from "@/lib/e2b-attachment-adapter";
 
 const SUGGESTIONS: Suggestion[] = [
   {
@@ -54,6 +55,9 @@ export default function Page() {
       api: "/api/generative-ui/chat",
       body: { modelId: selectedModel, themeId: selectedTheme },
     }),
+    adapters: {
+      attachments: e2bAttachmentAdapter,
+    },
   });
 
   return (
