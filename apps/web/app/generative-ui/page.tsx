@@ -73,8 +73,6 @@ export default function Page() {
             composerPlaceholder: "Describe the UI you want to build...",
             selectedModel,
             onModelChange: setSelectedModel,
-            selectedTheme,
-            onThemeChange: setSelectedTheme,
           }}
         />
       </div>

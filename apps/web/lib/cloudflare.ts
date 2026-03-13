@@ -41,7 +41,9 @@ export async function deployWorkerWithAssets(
   // Step 1: Build manifest
   const { hash, size } = await hashContent(html);
   const manifest = { "/index.html": { hash, size } };
-  const base64Content = btoa(unescape(encodeURIComponent(html)));
+  const base64Content = btoa(
+    Array.from(new TextEncoder().encode(html), (b) => String.fromCodePoint(b)).join(""),
+  );
 
   // Step 2: Create upload session via SDK
   const session = await client.workersForPlatforms.dispatch.namespaces.scripts.assetUpload.create(
@@ -90,38 +92,44 @@ export async function deployWorkerWithAssets(
     }
   }
 
-  // Step 4: Deploy worker with assets binding
-  const workerCode = `export default {
+  // Step 4: Deploy worker with assets binding (raw fetch to match CF API expectations)
+  const workerCode = `
+export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-    url.pathname = "/";
-    return env.ASSETS.fetch(new Request(url, request));
+    return env.ASSETS.fetch(request);
   }
-};`;
+};`
 
-  await client.workersForPlatforms.dispatch.namespaces.scripts.update(
-    namespace,
-    name,
+  const deployFormData = new FormData();
+  const metadata = {
+    main_module: "worker.mjs",
+    compatibility_date: "2025-01-24",
+    assets: { jwt: completionToken },
+    bindings: [{ type: "assets", name: "ASSETS" }],
+  };
+
+  deployFormData.append(
+    "metadata",
+    new Blob([JSON.stringify(metadata)], { type: "application/json" }),
+  );
+  deployFormData.append(
+    "worker.mjs",
+    new File([workerCode], "worker.mjs", { type: "application/javascript+module" }),
+  );
+
+  const deployRes = await fetch(
+    `${cfBase}/dispatch/namespaces/${namespace}/scripts/${name}`,
     {
-      account_id: accountId,
-      metadata: {
-        main_module: "worker.mjs",
-        compatibility_date: "2025-04-01",
-        assets: {
-          jwt: completionToken,
-          config: {
-            html_handling: "auto-trailing-slash",
-            not_found_handling: "single-page-application",
-          },
-        },
-      },
-      files: [
-        new File([workerCode], "worker.mjs", {
-          type: "application/javascript+module",
-        }),
-      ],
+      method: "PUT",
+      headers: { Authorization: `Bearer ${apiToken}` },
+      body: deployFormData,
     },
   );
+
+  if (!deployRes.ok) {
+    const err = await deployRes.text();
+    throw new Error(`Worker deploy failed (${deployRes.status}): ${err}`);
+  }
 
   return {
     url: `https://test-dispatcher.pouriab.workers.dev/${name}`,

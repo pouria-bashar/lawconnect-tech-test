@@ -2,7 +2,7 @@ import { defaultBuildLogger, Template } from "@e2b/code-interpreter";
 import {
   UI_GENERATOR_TEMPLATE,
   uiGeneratorTemplate,
-} from "./ui-generator";
+} from "@workspace/e2b/templates/ui-generator";
 
 async function main() {
   await Template.build(
