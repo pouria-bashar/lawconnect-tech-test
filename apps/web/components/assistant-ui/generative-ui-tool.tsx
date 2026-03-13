@@ -152,7 +152,10 @@ function BuildProgress({ events }: { events: EventWithId[] }) {
 export const BuildProgressDataUI = makeAssistantDataUI<ClaudeStreamEvent>({
   name: "build-progress",
   render: ({ data }) => {
+    const dispatched = useRef(false);
     useEffect(() => {
+      if (dispatched.current) return;
+      dispatched.current = true;
       listeners.forEach((fn) => fn(data));
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -165,17 +168,39 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
   { url: string }
 >({
   toolName: "build_ui",
-  render: function GenerativeUiRender({ result, status }) {
+  render: function GenerativeUiRender({ result, status, toolCallId }) {
     const [isExpanded, setIsExpanded] = useState(true);
+    const [cancelling, setCancelling] = useState(false);
     const loading = status.type === "running";
     const events = useBuildProgress(loading);
+
+    const handleCancel = useCallback(async () => {
+      if (!toolCallId || cancelling) return;
+      setCancelling(true);
+      try {
+        await fetch(`/api/generative-ui/cancel/${toolCallId}`, { method: "POST" });
+      } catch {
+        setCancelling(false);
+      }
+    }, [toolCallId, cancelling]);
 
     if (!result) {
       return (
         <div className="my-4 rounded-xl border bg-muted/30 p-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            {loading ? "Building your UI..." : "Waiting for result..."}
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              {cancelling ? "Cancelling..." : loading ? "Building your UI..." : "Waiting for result..."}
+            </div>
+            {loading && !cancelling && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              >
+                Cancel
+              </button>
+            )}
           </div>
           <BuildProgress events={events} />
         </div>
