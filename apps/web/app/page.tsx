@@ -39,6 +39,13 @@ const projects = [
     href: "/immigration",
     color: "text-amber-500",
   },
+  {
+    title: "Generative UI",
+    description:
+      "Describe any UI you want — login forms, landing pages, dashboards, resumes — and watch the AI build it live with interactive components.",
+    href: "/generative-ui",
+    color: "text-pink-500",
+  },
 ];
 
 export default function HomePage() {

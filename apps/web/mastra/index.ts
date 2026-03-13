@@ -5,6 +5,7 @@ import { PostgresStore } from '@mastra/pg'
 import { blogAgent } from "./agents/blogAgent";
 import { syntheticTestAgent } from "./agents/syntheticTestAgent";
 import { immigrationResearchAgent } from "./agents/immigrationAgent";
+import { codingAgent } from "./agents/codingAgent";
 
 const storage = new PostgresStore({
   id: "pg-storage",
@@ -18,6 +19,7 @@ export const mastra = new Mastra({
     blogAgent,
     syntheticTestAgent,
     immigrationResearchAgent,
+    codingAgent,
   },
   storage,
   

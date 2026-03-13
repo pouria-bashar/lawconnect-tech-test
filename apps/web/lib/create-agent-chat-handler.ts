@@ -4,7 +4,7 @@ import { RequestContext } from "@mastra/core/request-context";
 import { MODEL_ID_KEY } from "@/lib/model-config";
 import { mastra } from "@/mastra";
 
-export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "syntheticTestAgent" | "immigrationResearchAgent") {
+export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "syntheticTestAgent" | "immigrationResearchAgent" | "codingAgent") {
   return async function POST(req: Request) {
     const { messages, modelId } = await req.json();
 
