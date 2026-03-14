@@ -34,4 +34,4 @@ for (const skill of skillEntries) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const uiGeneratorTemplate: any = builder.skipCache();
+export const uiGeneratorTemplate = builder.skipCache();
