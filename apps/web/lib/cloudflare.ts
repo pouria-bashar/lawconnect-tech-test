@@ -104,9 +104,12 @@ export default {
   const metadata = {
     main_module: `${name}.mjs`,
     compatibility_date: "2025-01-24",
-    assets: { jwt: completionToken },
-    bindings: [{ type: "assets", name: "ASSETS" }],
-  };
+    assets: {
+      jwt: completionToken,
+      config: { html_handling: "auto-trailing-slash" },
+      binding: "ASSETS",
+    },
+  }
 
   deployFormData.append(
     "metadata",
@@ -132,7 +135,7 @@ export default {
   }
 
   return {
-    url: `https://test-dispatcher.pouriab.workers.dev/${name}`,
+    url: `https://ui.pouriab.workers.dev/${name}`,
     scriptName: name,
   };
 }
