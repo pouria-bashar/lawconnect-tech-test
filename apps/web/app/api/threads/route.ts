@@ -24,7 +24,11 @@ export async function GET(req: Request) {
   const result = await memory.listThreads({
     filter: { resourceId: agentId },
   });
-  return NextResponse.json({ threads: result.threads });
+  const sorted = [...result.threads].sort(
+    (a, b) =>
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+  );
+  return NextResponse.json({ threads: sorted });
 }
 
 export async function POST(req: Request) {
