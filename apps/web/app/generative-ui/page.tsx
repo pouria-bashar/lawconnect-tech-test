@@ -9,7 +9,7 @@ import {
 } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
-import { GenerativeUiToolUI, BuildProgressDataUI } from "@/components/assistant-ui/generative-ui-tool";
+import { GenerativeUiToolUI, BuildProgressDataUI, DeployProvider } from "@/components/assistant-ui/generative-ui-tool";
 import { DEFAULT_MODEL } from "@/lib/model-config";
 import { e2bAttachmentAdapter } from "@/lib/e2b-attachment-adapter";
 import { ChatLayout } from "@/components/chat-layout";
@@ -60,12 +60,11 @@ function PageContent() {
 
 function ChatRuntime({ threadId, initialMessages }: { threadId?: string; initialMessages?: import("ai").UIMessage[] }) {
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
-  const [selectedTheme, setSelectedTheme] = useState("modern-minimal");
 
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: CHAT_API,
-      body: { modelId: selectedModel, themeId: selectedTheme, threadId, resourceId: AGENT_ID },
+      body: { modelId: selectedModel, threadId, resourceId: AGENT_ID },
     }),
     adapters: { attachments: e2bAttachmentAdapter },
     messages: initialMessages,
@@ -73,20 +72,22 @@ function ChatRuntime({ threadId, initialMessages }: { threadId?: string; initial
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <GenerativeUiToolUI />
-      <BuildProgressDataUI />
-      <div className="relative h-dvh">
-        <Thread
-          config={{
-            maxWidth: "64rem",
-            welcome: WELCOME,
-            suggestions: SUGGESTIONS,
-            composerPlaceholder: "Describe the UI you want to build...",
-            selectedModel,
-            onModelChange: setSelectedModel,
-          }}
-        />
-      </div>
+      <DeployProvider threadId={threadId}>
+        <GenerativeUiToolUI />
+        <BuildProgressDataUI />
+        <div className="relative h-dvh">
+          <Thread
+            config={{
+              maxWidth: "64rem",
+              welcome: WELCOME,
+              suggestions: SUGGESTIONS,
+              composerPlaceholder: "Describe the UI you want to build...",
+              selectedModel,
+              onModelChange: setSelectedModel,
+            }}
+          />
+        </div>
+      </DeployProvider>
     </AssistantRuntimeProvider>
   );
 }

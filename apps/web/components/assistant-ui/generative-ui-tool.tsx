@@ -1,8 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { makeAssistantToolUI, makeAssistantDataUI } from "@assistant-ui/react";
 import type { ClaudeStreamEvent } from "@workspace/e2b/run-claude-code";
+
+const DeployContext = createContext<{ threadId?: string }>({});
+export function DeployProvider({ threadId, children }: { threadId?: string; children: React.ReactNode }) {
+  return <DeployContext.Provider value={{ threadId }}>{children}</DeployContext.Provider>;
+}
 
 const MAX_EVENTS = 200;
 
@@ -169,6 +174,7 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
 >({
   toolName: "build_ui",
   render: function GenerativeUiRender({ result, status, toolCallId }) {
+    const { threadId } = useContext(DeployContext);
     const [isExpanded, setIsExpanded] = useState(true);
     const [cancelling, setCancelling] = useState(false);
     const [deploying, setDeploying] = useState(false);
@@ -183,10 +189,11 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
       setDeploying(true);
       setDeployError(null);
       try {
+        const scriptName = threadId ? `genui-${threadId}` : undefined;
         const res = await fetch("/api/generative-ui/deploy", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: result.url }),
+          body: JSON.stringify({ url: result.url, scriptName }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Deployment failed");
@@ -197,7 +204,7 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
       } finally {
         setDeploying(false);
       }
-    }, [result?.url, deploying]);
+    }, [result?.url, deploying, threadId]);
 
     const handleCancel = useCallback(async () => {
       if (!toolCallId || cancelling) return;
