@@ -1,9 +1,10 @@
-import { Agent } from "@mastra/core/agent";
-import { getModelFromContext } from "@/lib/model-config";
-import { toolPrompt } from "@/lib/json-render-catalog";
-import { renderUiTool } from "../tools/render_ui";
-import { findLawyerTool } from "../tools/find_lawyer";
-import { askQuestionTool } from "../tools/ask_question";
+import { Agent } from "@mastra/core/agent"
+import { getModelFromContext } from "@/lib/model-config"
+import { toolPrompt } from "@/lib/json-render-catalog"
+import { renderUiTool } from "../tools/render_ui"
+import { findLawyerTool } from "../tools/find_lawyer"
+import { askQuestionTool } from "../tools/ask_question"
+import { sharedMemory } from "../memory"
 
 const uiReference = toolPrompt({
   customRules: [
@@ -13,12 +14,12 @@ const uiReference = toolPrompt({
     "Use Stack with gap 'md' or 'lg' for generous spacing between fields.",
     "Use appropriate input types: Input for short text, Select for choices, Checkbox for acknowledgements.",
     "Add a Submit button at the bottom.",
-    "EVERY form MUST have a Brand component as the FIRST child of the root Card: { \"type\": \"Brand\", \"props\": {}, \"children\": [] }. Do NOT use an Image, logo, or Heading for branding — always use the Brand component. Do NOT set a 'title' prop on the root Card — use a separate Heading child element AFTER the Brand for the form title.",
-    "PRE-FILLING IS CRITICAL: You MUST pass a 'state' object in the render_ui tool call containing every piece of information the user provided during the conversation. Every Input MUST use { \"$bindState\": \"/key\" } for its value prop, where the key matches a key in the state object. Fields the user did NOT provide should be empty strings. NEVER omit the state field — the form will appear blank without it.",
+    'EVERY form MUST have a Brand component as the FIRST child of the root Card: { "type": "Brand", "props": {}, "children": [] }. Do NOT use an Image, logo, or Heading for branding — always use the Brand component. Do NOT set a \'title\' prop on the root Card — use a separate Heading child element AFTER the Brand for the form title.',
+    'PRE-FILLING IS CRITICAL: You MUST pass a \'state\' object in the render_ui tool call containing every piece of information the user provided during the conversation. Every Input MUST use { "$bindState": "/key" } for its value prop, where the key matches a key in the state object. Fields the user did NOT provide should be empty strings. NEVER omit the state field — the form will appear blank without it.',
     "VALIDATION IS REQUIRED: Add 'checks' to ALL Input fields with appropriate validators. Use 'required' for mandatory fields, 'email' for email fields, 'pattern' with date regex for date fields. DO NOT ADD VALIDATION for phone numbers. Set 'validateOn' to 'blur' for all fields.",
     "NEVER use viewport height classes (min-h-screen, h-screen) — the UI renders inside a fixed-size container.",
   ],
-});
+})
 
 export const leadAgent = new Agent({
   id: "lead-agent",
@@ -108,5 +109,10 @@ IMPORTANT SUBMIT BUTTON: Every form MUST have a Submit button that uses the "sub
 
 ${uiReference}`,
   model: ({ requestContext }) => getModelFromContext(requestContext),
-  tools: { render_ui: renderUiTool, find_lawyer: findLawyerTool, ask_question: askQuestionTool },
-});
+  memory: sharedMemory,
+  tools: {
+    render_ui: renderUiTool,
+    find_lawyer: findLawyerTool,
+    ask_question: askQuestionTool,
+  },
+})

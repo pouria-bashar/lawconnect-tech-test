@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import {
   useChatRuntime,
@@ -8,6 +9,11 @@ import {
 } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
+import { ChatLayout } from "@/components/chat-layout";
+import { useThreadMessages } from "@/lib/use-thread-messages";
+
+const AGENT_ID = "immigrationResearchAgent";
+const CHAT_API = "/api/immigration/chat";
 
 const IMMIGRATION_SUGGESTIONS: Suggestion[] = [
   {
@@ -46,13 +52,46 @@ const WELCOME = (
 );
 
 export default function Page() {
-  const [selectedModel, setSelectedModel] = useState("google/gemini-2.5-flash")
+  return (
+    <Suspense>
+      <PageContent />
+    </Suspense>
+  );
+}
+
+function PageContent() {
+  const searchParams = useSearchParams();
+  const threadId = searchParams?.get("thread") ?? undefined;
+  const { messages: initialMessages, isLoading } = useThreadMessages(CHAT_API, threadId);
+
+  return (
+    <ChatLayout agentId={AGENT_ID}>
+      {isLoading ? (
+        <div className="flex h-[calc(100dvh-3rem)] items-center justify-center">
+          <span className="text-muted-foreground text-sm">Loading...</span>
+        </div>
+      ) : (
+        <ChatRuntime key={threadId ?? "new"} threadId={threadId} initialMessages={initialMessages ?? undefined} />
+      )}
+    </ChatLayout>
+  );
+}
+
+function ChatRuntime({
+  threadId,
+  initialMessages,
+}: {
+  threadId?: string;
+  initialMessages?: import("ai").UIMessage[];
+}) {
+  const [selectedModel, setSelectedModel] = useState("google/gemini-2.5-flash");
 
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
-      api: "/api/immigration/chat",
-      body: { modelId: selectedModel },
+      api: CHAT_API,
+      body: { modelId: selectedModel, threadId, resourceId: AGENT_ID },
     }),
+    messages: initialMessages,
   });
 
   return (

@@ -2,4 +2,6 @@ import { createAgentChatHandler } from "@/lib/create-agent-chat-handler";
 
 export const maxDuration = 60;
 
-export const POST = createAgentChatHandler("syntheticTestAgent");
+const handler = createAgentChatHandler("syntheticTestAgent");
+export const POST = handler.POST;
+export const GET = handler.GET;

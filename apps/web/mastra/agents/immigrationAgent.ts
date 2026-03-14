@@ -1,6 +1,6 @@
 import { Agent } from "@mastra/core/agent"
-import { Memory } from "@mastra/memory"
 import { getModelFromContext } from "@/lib/model-config"
+import { sharedMemory } from "../memory"
 import { firecrawlMcp } from "../mcp/firecrawl"
 
 export const immigrationResearchAgent = new Agent({
@@ -28,7 +28,7 @@ export const immigrationResearchAgent = new Agent({
 - Structure your response clearly with headings and bullet points
 - Flag when information should be verified with a registered migration agent`,
   model: ({ requestContext }) => getModelFromContext(requestContext),
-  memory: new Memory(),
+  memory: sharedMemory,
   tools: {
     ...(await firecrawlMcp.listTools()),
   },

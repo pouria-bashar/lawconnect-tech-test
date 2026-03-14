@@ -1,6 +1,7 @@
 import { Agent } from "@mastra/core/agent";
 import { getModelFromContext } from "@/lib/model-config";
 import { buildUiTool } from "../tools/build_ui";
+import { sharedMemory } from "../memory";
 
 export const codingAgent = new Agent({
   id: "coding-agent",
@@ -54,5 +55,6 @@ Users can upload files (resumes, images, documents, etc.). When a message contai
 - After the result, summarize what was built and offer to iterate
 - For games: be enthusiastic and descriptive about the game mechanics in your summary`,
   model: ({ requestContext }) => getModelFromContext(requestContext),
+  memory: sharedMemory,
   tools: { build_ui: buildUiTool },
 });

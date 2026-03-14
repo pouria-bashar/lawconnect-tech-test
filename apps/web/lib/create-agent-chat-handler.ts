@@ -1,37 +1,62 @@
-import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
-import { toAISdkStream } from "@mastra/ai-sdk"
+import { handleChatStream } from "@mastra/ai-sdk";
+import { toAISdkV5Messages } from "@mastra/ai-sdk/ui";
+import { createUIMessageStreamResponse } from "ai";
+import { mastra } from "@/mastra";
+import { NextResponse } from "next/server";
 import { RequestContext } from "@mastra/core/request-context";
 import { MODEL_ID_KEY } from "@/lib/model-config";
-import { mastra } from "@/mastra";
 
-export function createAgentChatHandler(agentName: "leadAgent" | "blogAgent" | "syntheticTestAgent" | "immigrationResearchAgent" | "codingAgent") {
-  return async function POST(req: Request) {
-    const { messages, modelId, themeId } = await req.json();
+export type AgentName =
+  | "leadAgent"
+  | "blogAgent"
+  | "syntheticTestAgent"
+  | "immigrationResearchAgent"
+  | "codingAgent";
 
-    const agent = mastra.getAgent(agentName);
+export function createAgentChatHandler(agentName: AgentName) {
+  return {
+    POST: async (req: Request): Promise<Response> => {
+      const params = await req.json();
+      const { threadId, resourceId, modelId, themeId } = params;
 
-    const requestContext = new RequestContext();
-    if (modelId) {
-      requestContext.set(MODEL_ID_KEY, modelId);
-    }
-    if (themeId) {
-      requestContext.set("themeId", themeId);
-    }
+      if (!threadId) {
+        return new Response("threadId is required", { status: 400 });
+      }
 
-    const stream = await agent.stream(messages, { requestContext });
+      const requestContext = new RequestContext();
+      if (modelId) requestContext.set(MODEL_ID_KEY, modelId);
+      if (themeId) requestContext.set("themeId", themeId);
 
-    const uiMessageStream = createUIMessageStream({
-      originalMessages: messages,
-      execute: async ({ writer }) => {
-        for await (const part of toAISdkStream(stream, { from: "agent" })) {
-          // @ts-expect-error - @mastra/ai-sdk FinishReason includes 'unknown' which ai@6 FinishReason does not
-          await writer.write(part);
-        }
-      },
-    });
+      const stream = await handleChatStream({
+        mastra,
+        agentId: agentName,
+        params: {
+          messages: params.messages,
+          requestContext,
+          memory: {
+            thread: threadId,
+            resource: resourceId ?? agentName,
+          },
+        },
+      });
+      // @ts-expect-error - @mastra/ai-sdk FinishReason includes 'unknown' which ai@6 FinishReason does not
+      return createUIMessageStreamResponse({ stream });
+    },
+    GET: async (req: Request): Promise<Response> => {
+      const { searchParams } = new URL(req.url);
+      const threadId = searchParams.get("threadId") ?? "";
+      const resourceId = searchParams.get("resourceId") ?? agentName;
 
-    return createUIMessageStreamResponse({
-      stream: uiMessageStream,
-    });
+      const memory = await mastra.getAgent(agentName).getMemory();
+      let response = null;
+      try {
+        response = await memory?.recall({ threadId, resourceId });
+      } catch {
+        /* no previous messages */
+      }
+
+      const uiMessages = toAISdkV5Messages(response?.messages || []);
+      return NextResponse.json(uiMessages);
+    },
   };
 }

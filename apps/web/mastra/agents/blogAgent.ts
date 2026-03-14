@@ -3,6 +3,7 @@ import { getModelFromContext } from "@/lib/model-config";
 import { renderBlogTool } from "../tools/render_blog";
 import { saveBlogTool } from "../tools/save_blog";
 import { askQuestionTool } from "../tools/ask_question";
+import { sharedMemory } from "../memory";
 
 export const blogAgent = new Agent({
   id: "blog-agent",
@@ -136,5 +137,6 @@ You MUST use the render_blog tool to display content. The content field must be 
 - Use highlight marks to emphasize key phrases.
 - Use task lists for actionable items or checklists.`,
   model: ({ requestContext }) => getModelFromContext(requestContext),
+  memory: sharedMemory,
   tools: { render_blog: renderBlogTool, save_blog: saveBlogTool, ask_question: askQuestionTool },
 });

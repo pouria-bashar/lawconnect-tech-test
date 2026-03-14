@@ -3,6 +3,7 @@ import { getModelFromContext } from "@/lib/model-config";
 import { renderTestTool } from "../tools/render_test";
 import { saveTestTool } from "../tools/save_test";
 import { findTestTool } from "../tools/find_test";
+import { sharedMemory } from "../memory";
 
 export const syntheticTestAgent = new Agent({
   id: "synthetic-test-agent",
@@ -78,5 +79,6 @@ test.describe("Homepage", () => {
 - Use descriptive test names that explain what is being tested.
 - Provide a short, descriptive name for each test file.`,
   model: ({ requestContext }) => getModelFromContext(requestContext),
+  memory: sharedMemory,
   tools: { render_test: renderTestTool, save_test: saveTestTool, find_test: findTestTool },
 });
