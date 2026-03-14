@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/client";
 import { useThreads } from "@/lib/use-threads";
 import {
@@ -29,6 +30,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import {
@@ -36,6 +38,8 @@ import {
   Trash2Icon,
   LogOutIcon,
   ChevronsUpDownIcon,
+  SunIcon,
+  MoonIcon,
   UserSearchIcon,
   LayoutDashboardIcon,
   PenLineIcon,
@@ -212,6 +216,7 @@ function ThreadList({
 
 function UserMenu() {
   const router = useRouter();
+  const { setTheme, resolvedTheme } = useTheme();
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -244,6 +249,11 @@ function UserMenu() {
             align="end"
             sideOffset={4}
           >
+            <DropdownMenuItem onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
+              {resolvedTheme === "dark" ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
+              {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
               <LogOutIcon className="size-4" />
               Sign out

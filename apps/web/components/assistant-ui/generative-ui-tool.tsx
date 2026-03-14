@@ -1,8 +1,10 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { makeAssistantToolUI, makeAssistantDataUI } from "@assistant-ui/react";
 import type { ClaudeStreamEvent } from "@workspace/e2b/run-claude-code";
+import { useDeploy } from "@/hooks/use-deploy";
+import { useCancelBuild } from "@/hooks/use-cancel-build";
 
 const DeployContext = createContext<{ threadId?: string }>({});
 export function DeployProvider({ threadId, children }: { threadId?: string; children: React.ReactNode }) {
@@ -176,45 +178,25 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
   render: function GenerativeUiRender({ result, status, toolCallId }) {
     const { threadId } = useContext(DeployContext);
     const [isExpanded, setIsExpanded] = useState(true);
-    const [cancelling, setCancelling] = useState(false);
-    const [deploying, setDeploying] = useState(false);
-    const [deployResult, setDeployResult] = useState<{ url: string; scriptName: string } | null>(null);
     const [showDeployDialog, setShowDeployDialog] = useState(false);
-    const [deployError, setDeployError] = useState<string | null>(null);
     const loading = status.type === "running";
     const events = useBuildProgress(loading);
 
-    const handleDeploy = useCallback(async () => {
-      if (!result?.url || deploying) return;
-      setDeploying(true);
-      setDeployError(null);
-      try {
-        const scriptName = threadId ? `genui-${threadId}` : undefined;
-        const res = await fetch("/api/generative-ui/deploy", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: result.url, scriptName }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Deployment failed");
-        setDeployResult({ url: data.url, scriptName: data.scriptName });
-        setShowDeployDialog(true);
-      } catch (e) {
-        setDeployError(e instanceof Error ? e.message : "Deployment failed");
-      } finally {
-        setDeploying(false);
-      }
-    }, [result?.url, deploying, threadId]);
+    const deploy = useDeploy();
+    const cancel = useCancelBuild();
 
-    const handleCancel = useCallback(async () => {
-      if (!toolCallId || cancelling) return;
-      setCancelling(true);
-      try {
-        await fetch(`/api/generative-ui/cancel/${toolCallId}`, { method: "POST" });
-      } catch {
-        setCancelling(false);
-      }
-    }, [toolCallId, cancelling]);
+    const handleDeploy = () => {
+      if (!result?.url) return;
+      deploy.mutate(
+        { url: result.url, scriptName: threadId ? `genui-${threadId}` : undefined },
+        { onSuccess: () => setShowDeployDialog(true) },
+      );
+    };
+
+    const handleCancel = () => {
+      if (!toolCallId) return;
+      cancel.mutate(toolCallId);
+    };
 
     if (!result) {
       return (
@@ -222,9 +204,9 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              {cancelling ? "Cancelling..." : loading ? "Building your UI..." : "Waiting for result..."}
+              {cancel.isPending ? "Cancelling..." : loading ? "Building your UI..." : "Waiting for result..."}
             </div>
-            {loading && !cancelling && (
+            {loading && !cancel.isPending && (
               <button
                 type="button"
                 onClick={handleCancel}
@@ -254,9 +236,9 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
             {isExpanded ? "Collapse" : "Expand"} preview
           </button>
           <div className="flex items-center gap-2">
-            {(result.outputType ?? "html") === "html" && (
+            {result.outputType === "html" && (
               <>
-                {deployResult ? (
+                {deploy.data ? (
                   <button
                     type="button"
                     onClick={() => setShowDeployDialog(true)}
@@ -268,10 +250,10 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
                   <button
                     type="button"
                     onClick={handleDeploy}
-                    disabled={deploying}
+                    disabled={deploy.isPending}
                     className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                   >
-                    {deploying ? (
+                    {deploy.isPending ? (
                       <>
                         <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                         Deploying...
@@ -294,10 +276,10 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
             </a>
           </div>
         </div>
-        {deployError && (
-          <p className="text-xs text-destructive mb-2">{deployError}</p>
+        {deploy.error && (
+          <p className="text-xs text-destructive mb-2">{deploy.error.message}</p>
         )}
-        {showDeployDialog && deployResult && (
+        {showDeployDialog && deploy.data && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div
               className="absolute inset-0 bg-black/50"
@@ -322,12 +304,12 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
               <div className="rounded-lg border bg-muted/30 p-3 mb-4">
                 <p className="text-xs text-muted-foreground mb-1">Deployment URL</p>
                 <a
-                  href={deployResult.url}
+                  href={deploy.data.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-medium text-primary break-all hover:underline"
                 >
-                  {deployResult.url}
+                  {deploy.data.url}
                 </a>
               </div>
               <div className="flex justify-end gap-2">
@@ -339,7 +321,7 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
                   Close
                 </button>
                 <a
-                  href={deployResult.url}
+                  href={deploy.data.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
@@ -365,6 +347,55 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
             style={{ height: "600px" }}
             title={result.outputType === "pdf" ? "Generated PDF" : "Generated UI"}
           />
+        ))}
+      </div>
+    );
+  },
+});
+
+export const FindFileToolUI = makeAssistantToolUI<
+  { filename: string },
+  { files: { path: string; url: string }[]; error?: string }
+>({
+  toolName: "find_file",
+  render: function FindFileRender({ result }) {
+    if (!result) {
+      return (
+        <div className="my-4 rounded-lg border bg-muted/30 p-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            Searching sandbox...
+          </div>
+        </div>
+      );
+    }
+
+    if (result.error && result.files.length === 0) {
+      return (
+        <div className="my-4 rounded-lg border bg-muted/30 p-3">
+          <p className="text-sm text-muted-foreground">{result.error}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="my-4 rounded-lg border bg-muted/30 p-3 space-y-2">
+        <p className="text-xs text-muted-foreground">
+          Found {result.files.length} file{result.files.length !== 1 ? "s" : ""}
+        </p>
+        {result.files.map((file) => (
+          <div key={file.path} className="flex items-center justify-between gap-2">
+            <span className="text-sm font-mono truncate">{file.path.split("/").pop()}</span>
+            <a
+              href={file.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Download &darr;
+            </a>
+          </div>
         ))}
       </div>
     );

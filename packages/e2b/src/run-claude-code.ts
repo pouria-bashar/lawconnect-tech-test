@@ -3,6 +3,12 @@ import { processRegistry } from "@workspace/e2b/process-registry"
 
 export type OutputType = "html" | "png" | "pdf"
 
+const OUTPUT_FILES: { path: string; type: OutputType }[] = [
+  { path: "/home/user/output.html", type: "html" },
+  { path: "/home/user/output.png", type: "png" },
+  { path: "/home/user/output.pdf", type: "pdf" },
+]
+
 export interface RunResult {
   status: "pass" | "fail" | "error"
   logs: string
@@ -106,23 +112,22 @@ export async function runClaudeCode(instruction: string, options?: RunOptions): 
     const durationMs = Date.now() - start
 
     // Get download URL for the generated output file (try HTML, PNG, PDF in order)
-    const OUTPUT_FILES: { path: string; type: OutputType }[] = [
-      { path: "/home/user/output.html", type: "html" },
-      { path: "/home/user/output.png", type: "png" },
-      { path: "/home/user/output.pdf", type: "pdf" },
-    ]
-
     let url: string | undefined
     let outputType: OutputType | undefined
     if (result.exitCode === 0) {
-      for (const file of OUTPUT_FILES) {
-        try {
-          url = await sbx.downloadUrl(file.path)
-          outputType = file.type
-          break
-        } catch {
-          // File doesn't exist, try next
+      try {
+        const entries = await sbx.files.list("/home/user")
+        const fileNames = new Set(entries.map((e) => e.name))
+        for (const file of OUTPUT_FILES) {
+          const name = file.path.split("/").pop()!
+          if (fileNames.has(name)) {
+            url = await sbx.downloadUrl(file.path)
+            outputType = file.type
+            break
+          }
         }
+      } catch {
+        // Directory listing failed, skip
       }
     }
 
