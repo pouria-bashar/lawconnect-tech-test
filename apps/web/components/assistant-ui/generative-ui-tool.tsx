@@ -418,9 +418,9 @@ export const FindFileToolUI = makeAssistantToolUI<
     return (
       <div className="my-4 rounded-lg border bg-muted/30 p-3 space-y-2">
         <p className="text-xs text-muted-foreground">
-          Found {result.files.length} file{result.files.length !== 1 ? "s" : ""}
+          Found {result?.files?.length} file{result?.files?.length !== 1 ? "s" : ""}
         </p>
-        {result.files.map((file) => (
+        {result?.files?.map((file) => (
           <div key={file.path} className="flex items-center justify-between gap-2">
             <span className="text-sm font-mono truncate">{file.path.split("/").pop()}</span>
             <a
