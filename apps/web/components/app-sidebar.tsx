@@ -41,6 +41,7 @@ import {
   PenLineIcon,
   FlaskConicalIcon,
   GlobeIcon,
+  LoaderIcon,
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -177,6 +178,7 @@ function ThreadList({
             ))
           : threads.map((thread) => {
               const isActive = thread.id === currentThreadId;
+              const titlePending = !thread.title || thread.title === "New Chat";
               return (
                 <SidebarMenuItem key={thread.id}>
                   <SidebarMenuButton
@@ -185,8 +187,11 @@ function ThreadList({
                     tooltip={thread.title ?? "New Chat"}
                   >
                     <Link href={buildHref(thread.id)}>
+                      {titlePending ? (
+                        <LoaderIcon className="size-3 animate-spin shrink-0 text-muted-foreground" />
+                      ) : null}
                       <span className="truncate">
-                        {thread.title ?? "New Chat"}
+                        {titlePending ? "Generating..." : thread.title}
                       </span>
                     </Link>
                   </SidebarMenuButton>
