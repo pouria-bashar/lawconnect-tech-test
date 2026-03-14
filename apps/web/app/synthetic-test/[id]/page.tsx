@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 import dynamic from "next/dynamic";
 import type { Monaco } from "@monaco-editor/react";
 import { cn } from "@workspace/ui/lib/utils";
@@ -166,60 +168,61 @@ interface TestReport {
 
 export default function SyntheticTestDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [test, setTest] = useState<TestData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [editedCode, setEditedCode] = useState("");
   const [isDirty, setIsDirty] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const saveMessageTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [runResult, setRunResult] = useState<RunResult | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [reports, setReports] = useState<TestReport[]>([]);
-  const [reportsLoading, setReportsLoading] = useState(true);
-  const [reportsRefreshing, setReportsRefreshing] = useState(false);
   const [expandedReport, setExpandedReport] = useState<string | null>(null);
+  const codeInitialized = useRef(false);
 
-  const fetchReports = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/synthetic-test/${id}/reports`);
-      if (res.ok) {
-        const data = await res.json();
-        setReports(data);
+  const {
+    data: test = null,
+    isLoading: loading,
+    error: testError,
+  } = useQuery<TestData | null>({
+    queryKey: queryKeys.syntheticTest.detail(id),
+    queryFn: async () => {
+      const res = await fetch(`/api/synthetic-test/${id}`);
+      if (!res.ok) {
+        throw new Error(res.status === 404 ? "Test not found" : "Failed to load test");
       }
-    } catch {
-      // silently fail
-    } finally {
-      setReportsLoading(false);
-    }
-  }, [id]);
+      return res.json();
+    },
+  });
 
-  const handleRefreshReports = useCallback(async () => {
-    setReportsRefreshing(true);
-    await fetchReports();
-    setReportsRefreshing(false);
-  }, [fetchReports]);
-
+  // Initialize editedCode from fetched test data only once
   useEffect(() => {
-    async function fetchTest() {
-      try {
-        const res = await fetch(`/api/synthetic-test/${id}`);
-        if (!res.ok) {
-          setError(res.status === 404 ? "Test not found" : "Failed to load test");
-          return;
-        }
-        const data = await res.json();
-        setTest(data);
-        setEditedCode(data.code);
-      } catch {
-        setError("Failed to load test");
-      } finally {
-        setLoading(false);
-      }
+    if (test?.code && !codeInitialized.current) {
+      setEditedCode(test.code);
+      codeInitialized.current = true;
     }
-    fetchTest();
-    fetchReports();
-  }, [id, fetchReports]);
+  }, [test?.code]);
+
+  // Clean up save message timer on unmount
+  useEffect(() => {
+    return () => clearTimeout(saveMessageTimer.current);
+  }, []);
+
+  const error = testError ? testError.message : null;
+
+  const {
+    data: reports = [],
+    isLoading: reportsLoading,
+    isFetching: reportsRefreshing,
+  } = useQuery<TestReport[]>({
+    queryKey: queryKeys.syntheticTest.reports(id),
+    queryFn: async () => {
+      const res = await fetch(`/api/synthetic-test/${id}/reports`);
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const handleRefreshReports = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.syntheticTest.reports(id) });
+  }, [queryClient, id]);
 
   const handleCodeChange = useCallback(
     (value: string | undefined) => {
@@ -230,33 +233,38 @@ export default function SyntheticTestDetailPage() {
     [test?.code],
   );
 
-  const handleSave = useCallback(async () => {
-    if (!test) return;
-    setSaving(true);
-    setSaveMessage(null);
-    try {
+  const saveMutation = useMutation({
+    mutationFn: async (code: string) => {
       const res = await fetch(`/api/synthetic-test/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: editedCode }),
+        body: JSON.stringify({ code }),
       });
       if (!res.ok) throw new Error("Failed to save");
-      const updated = await res.json();
-      setTest(updated);
+      return res.json();
+    },
+    onSuccess: (updated) => {
+      queryClient.setQueryData(queryKeys.syntheticTest.detail(id), updated);
       setIsDirty(false);
       setSaveMessage("Saved");
-      setTimeout(() => setSaveMessage(null), 2000);
-    } catch {
+      clearTimeout(saveMessageTimer.current);
+      saveMessageTimer.current = setTimeout(() => setSaveMessage(null), 2000);
+    },
+    onError: () => {
       setSaveMessage("Failed to save");
-    } finally {
-      setSaving(false);
-    }
-  }, [id, test, editedCode]);
+    },
+  });
 
-  const handleRun = useCallback(async () => {
-    setIsRunning(true);
-    setRunResult(null);
-    try {
+  const saving = saveMutation.isPending;
+
+  const handleSave = useCallback(async () => {
+    if (!test) return;
+    setSaveMessage(null);
+    saveMutation.mutate(editedCode);
+  }, [test, editedCode, saveMutation]);
+
+  const runMutation = useMutation({
+    mutationFn: async () => {
       const res = await fetch("/api/synthetic-test/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -264,17 +272,21 @@ export default function SyntheticTestDetailPage() {
       });
       const result = await res.json();
       if (!res.ok) {
-        setRunResult({
-          status: "error",
+        return {
+          status: "error" as const,
           logs: "",
           errors: result.error || "Request failed",
           durationMs: 0,
           reportId: "",
-        });
-      } else {
-        setRunResult(result);
+        };
       }
-    } catch (err) {
+      return result as RunResult;
+    },
+    onSuccess: (result) => {
+      setRunResult(result);
+      queryClient.invalidateQueries({ queryKey: queryKeys.syntheticTest.reports(id) });
+    },
+    onError: (err) => {
       setRunResult({
         status: "error",
         logs: "",
@@ -282,11 +294,15 @@ export default function SyntheticTestDetailPage() {
         durationMs: 0,
         reportId: "",
       });
-    } finally {
-      setIsRunning(false);
-      fetchReports();
-    }
-  }, [id, fetchReports]);
+    },
+  });
+
+  const isRunning = runMutation.isPending;
+
+  const handleRun = useCallback(async () => {
+    setRunResult(null);
+    runMutation.mutate();
+  }, [runMutation]);
 
   if (loading) {
     return (

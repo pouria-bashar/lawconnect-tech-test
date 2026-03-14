@@ -14,6 +14,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { cn } from "@workspace/ui/lib/utils";
 import { AppHeader } from "@/components/app-header";
+import { QueryProvider } from "@/components/query-provider";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -34,12 +35,14 @@ export default function RootLayout({
       className={cn("antialiased", fontSans.variable, "font-mono", jetbrainsMono.variable)}
     >
       <body>
-        <ThemeProvider>
-          <TooltipProvider>
-            <AppHeader />
-            {children}
-          </TooltipProvider>
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider>
+            <TooltipProvider>
+              <AppHeader />
+              {children}
+            </TooltipProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   )

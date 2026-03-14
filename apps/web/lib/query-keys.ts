@@ -1,0 +1,16 @@
+export const queryKeys = {
+  threads: {
+    all: ["threads"] as const,
+    list: (agentId: string) => ["threads", agentId] as const,
+  },
+  threadMessages: {
+    all: ["thread-messages"] as const,
+    detail: (chatApiPath: string, threadId?: string) =>
+      ["thread-messages", chatApiPath, threadId] as const,
+  },
+  syntheticTest: {
+    all: ["synthetic-test"] as const,
+    detail: (id: string) => ["synthetic-test", id] as const,
+    reports: (id: string) => ["synthetic-test-reports", id] as const,
+  },
+} as const;

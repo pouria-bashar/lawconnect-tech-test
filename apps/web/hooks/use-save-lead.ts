@@ -1,6 +1,5 @@
-import { useState, useCallback } from "react";
-
-import type { AsyncState } from "@/hooks/use-save-blog";
+import { useMutation } from "@tanstack/react-query";
+import { toAsyncState } from "@/hooks/use-save-blog";
 
 interface SaveLeadParams {
   name: string;
@@ -12,28 +11,23 @@ interface SaveLeadParams {
 }
 
 export function useSaveLead() {
-  const [state, setState] = useState<AsyncState>("idle");
-
-  const save = useCallback(async (params: SaveLeadParams) => {
-    setState("loading");
-    try {
-      
+  const mutation = useMutation({
+    mutationFn: async (params: SaveLeadParams) => {
       const res = await fetch("/api/leads/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(params),
       });
-      if (!res.ok) throw new Error("Failed to save");
-      const data = await res.json();
-      setState("success");
-      return data;
-    } catch {
-      setState("error");
-      throw new Error("Failed to save lead");
-    }
-  }, []);
+      if (!res.ok) throw new Error("Failed to save lead");
+      return res.json();
+    },
+  });
 
-  const reset = useCallback(() => setState("idle"), []);
+  const state = toAsyncState(mutation.status);
 
-  return { state, save, reset };
+  return {
+    state,
+    save: mutation.mutateAsync,
+    reset: mutation.reset,
+  };
 }
