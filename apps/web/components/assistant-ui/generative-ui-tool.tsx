@@ -170,7 +170,7 @@ export const BuildProgressDataUI = makeAssistantDataUI<ClaudeStreamEvent>({
 
 export const GenerativeUiToolUI = makeAssistantToolUI<
   { instructions: string },
-  { url: string }
+  { url: string; outputType: "html" | "png" | "pdf" }
 >({
   toolName: "build_ui",
   render: function GenerativeUiRender({ result, status, toolCallId }) {
@@ -254,38 +254,43 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
             {isExpanded ? "Collapse" : "Expand"} preview
           </button>
           <div className="flex items-center gap-2">
-            {deployResult ? (
-              <button
-                type="button"
-                onClick={() => setShowDeployDialog(true)}
-                className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
-              >
-                Deployed
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleDeploy}
-                disabled={deploying}
-                className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-              >
-                {deploying ? (
-                  <>
-                    <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    Deploying...
-                  </>
+            {(result.outputType ?? "html") === "html" && (
+              <>
+                {deployResult ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowDeployDialog(true)}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
+                  >
+                    Deployed
+                  </button>
                 ) : (
-                  "Deploy"
+                  <button
+                    type="button"
+                    onClick={handleDeploy}
+                    disabled={deploying}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {deploying ? (
+                      <>
+                        <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        Deploying...
+                      </>
+                    ) : (
+                      "Deploy"
+                    )}
+                  </button>
                 )}
-              </button>
+              </>
             )}
             <a
               href={result.url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+              {...((result.outputType === "png" || result.outputType === "pdf") ? { download: "" } : {})}
             >
-              Open in new tab &rarr;
+              {(result.outputType === "png" || result.outputType === "pdf") ? "Download" : "Open in new tab"} &rarr;
             </a>
           </div>
         </div>
@@ -345,15 +350,22 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
             </div>
           </div>
         )}
-        {isExpanded && (
+        {isExpanded && (result.outputType === "png" ? (
+          <img
+            src={result.url}
+            alt="Generated output"
+            className="w-full rounded-xl border bg-white object-contain"
+            style={{ maxHeight: "600px" }}
+          />
+        ) : (
           <iframe
             src={result.url}
             sandbox="allow-scripts allow-same-origin"
             className="w-full rounded-xl border bg-white"
             style={{ height: "600px" }}
-            title="Generated UI"
+            title={result.outputType === "pdf" ? "Generated PDF" : "Generated UI"}
           />
-        )}
+        ))}
       </div>
     );
   },

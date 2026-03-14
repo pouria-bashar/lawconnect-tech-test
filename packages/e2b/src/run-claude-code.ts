@@ -1,12 +1,15 @@
 import { getSandbox } from "@workspace/e2b/sandbox"
 import { processRegistry } from "@workspace/e2b/process-registry"
 
+export type OutputType = "html" | "png" | "pdf"
+
 export interface RunResult {
   status: "pass" | "fail" | "error"
   logs: string
   errors: string
   durationMs: number
   url?: string
+  outputType?: OutputType
 }
 
 export interface ClaudeStreamEvent {
@@ -102,13 +105,24 @@ export async function runClaudeCode(instruction: string, options?: RunOptions): 
 
     const durationMs = Date.now() - start
 
-    // Get download URL for the generated HTML file
+    // Get download URL for the generated output file (try HTML, PNG, PDF in order)
+    const OUTPUT_FILES: { path: string; type: OutputType }[] = [
+      { path: "/home/user/output.html", type: "html" },
+      { path: "/home/user/output.png", type: "png" },
+      { path: "/home/user/output.pdf", type: "pdf" },
+    ]
+
     let url: string | undefined
+    let outputType: OutputType | undefined
     if (result.exitCode === 0) {
-      try {
-        url = await sbx.downloadUrl("/home/user/output.html")
-      } catch {
-        // File might not exist if Claude Code didn't generate it
+      for (const file of OUTPUT_FILES) {
+        try {
+          url = await sbx.downloadUrl(file.path)
+          outputType = file.type
+          break
+        } catch {
+          // File doesn't exist, try next
+        }
       }
     }
 
@@ -118,6 +132,7 @@ export async function runClaudeCode(instruction: string, options?: RunOptions): 
       errors: result.stderr,
       durationMs,
       url,
+      outputType,
     }
   } catch (error: unknown) {
     console.log(JSON.stringify(error), "????")

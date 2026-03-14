@@ -6,6 +6,7 @@ if (!token) {
 }
 
 export const firecrawlMcp = new MCPClient({
+  id: "firecrawl",
   timeout: 120000,
   servers: {
     firecrawl: {

@@ -91,7 +91,7 @@ export async function PATCH(req: Request) {
   const thread = await memory.updateThread({
     id: threadId,
     title: title ?? "New Chat",
-    ...(status !== undefined && { metadata: { status } }),
+    metadata: status !== undefined ? { status } : {},
   });
 
   return NextResponse.json(thread);

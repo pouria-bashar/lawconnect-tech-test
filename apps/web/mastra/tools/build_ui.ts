@@ -14,7 +14,8 @@ export const buildUiTool = createTool({
       ),
   }),
   outputSchema: z.object({
-    url: z.string().describe("URL to the generated HTML file"),
+    url: z.string().describe("URL to the generated output file"),
+    outputType: z.enum(["html", "png", "pdf"]).describe("Type of the generated output"),
   }),
   execute: async (input, context) => {
     const processId = context?.agent?.toolCallId ?? crypto.randomUUID();
@@ -36,10 +37,10 @@ export const buildUiTool = createTool({
 
     if (!result.url) {
       throw new Error(
-        `Claude Code did not generate an HTML file. Status: ${result.status}. Errors: ${result.errors}`,
+        `Claude Code did not generate an output file. Status: ${result.status}. Errors: ${result.errors}`,
       );
     }
 
-    return { url: result.url };
+    return { url: result.url, outputType: result.outputType ?? "html" };
   },
 });
