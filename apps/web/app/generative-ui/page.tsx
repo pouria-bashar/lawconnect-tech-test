@@ -48,7 +48,7 @@ function PageContent() {
   return (
     <ChatLayout agentId={AGENT_ID}>
       {isLoading ? (
-        <div className="flex h-[calc(100dvh-3rem)] items-center justify-center">
+        <div className="flex h-dvh items-center justify-center">
           <span className="text-muted-foreground text-sm">Loading...</span>
         </div>
       ) : (
@@ -75,7 +75,7 @@ function ChatRuntime({ threadId, initialMessages }: { threadId?: string; initial
     <AssistantRuntimeProvider runtime={runtime}>
       <GenerativeUiToolUI />
       <BuildProgressDataUI />
-      <div className="relative h-[calc(100dvh-3rem)]">
+      <div className="relative h-dvh">
         <Thread
           config={{
             maxWidth: "64rem",

@@ -306,7 +306,7 @@ export default function SyntheticTestDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100dvh-3rem)] items-center justify-center">
+      <div className="flex h-dvh items-center justify-center">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
           Loading test...
@@ -317,7 +317,7 @@ export default function SyntheticTestDetailPage() {
 
   if (error || !test) {
     return (
-      <div className="flex h-[calc(100dvh-3rem)] flex-col items-center justify-center gap-4">
+      <div className="flex h-dvh flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">{error || "Test not found"}</p>
         <Link href="/synthetic-test">
           <Button variant="outline" size="sm" className="gap-2">

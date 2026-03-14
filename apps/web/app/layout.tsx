@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { cn } from "@workspace/ui/lib/utils";
-import { AppHeader } from "@/components/app-header";
 import { QueryProvider } from "@/components/query-provider";
+import { AppShell } from "@/components/app-shell";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -38,8 +38,7 @@ export default function RootLayout({
         <QueryProvider>
           <ThemeProvider>
             <TooltipProvider>
-              <AppHeader />
-              {children}
+              <AppShell>{children}</AppShell>
             </TooltipProvider>
           </ThemeProvider>
         </QueryProvider>

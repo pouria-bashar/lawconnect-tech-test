@@ -192,6 +192,7 @@ export const AskQuestionToolUI = makeAssistantToolUI<
 
           {allowOther && (
             <button
+              key="__other"
               type="button"
               onClick={() => toggleOption("other")}
               className={cn(
@@ -246,6 +247,7 @@ export const AskQuestionToolUI = makeAssistantToolUI<
 
           {allowOther && selected.has("other") && (
             <input
+              key="__other-input"
               type="text"
               value={otherText}
               onChange={(e) => setOtherText(e.target.value)}
