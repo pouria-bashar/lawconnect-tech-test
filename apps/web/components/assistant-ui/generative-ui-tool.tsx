@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { makeAssistantToolUI, makeAssistantDataUI } from "@assistant-ui/react";
 import type { ClaudeStreamEvent } from "@workspace/e2b/run-claude-code";
 import { useDeploy } from "@/hooks/use-deploy";
+import { useExportPdf } from "@/hooks/use-export-pdf";
 import { useCancelBuild } from "@/hooks/use-cancel-build";
 
 const DeployContext = createContext<{ threadId?: string }>({});
@@ -183,6 +184,7 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
     const events = useBuildProgress(loading);
 
     const deploy = useDeploy();
+    const exportPdf = useExportPdf();
     const cancel = useCancelBuild();
 
     const handleDeploy = () => {
@@ -196,6 +198,23 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
     const handleCancel = () => {
       if (!toolCallId) return;
       cancel.mutate(toolCallId);
+    };
+
+    const handleExportPdf = () => {
+      if (!result?.url) return;
+      exportPdf.mutate(
+        { url: result.url },
+        {
+          onSuccess: (data) => {
+            const a = document.createElement("a");
+            a.href = data.url;
+            a.download = "export.pdf";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          },
+        },
+      );
     };
 
     if (!result) {
@@ -263,6 +282,21 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
                     )}
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={handleExportPdf}
+                  disabled={exportPdf.isPending}
+                  className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                  {exportPdf.isPending ? (
+                    <>
+                      <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Exporting...
+                    </>
+                  ) : (
+                    "Download PDF"
+                  )}
+                </button>
               </>
             )}
             <a
@@ -278,6 +312,9 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
         </div>
         {deploy.error && (
           <p className="text-xs text-destructive mb-2">{deploy.error.message}</p>
+        )}
+        {exportPdf.error && (
+          <p className="text-xs text-destructive mb-2">{exportPdf.error.message}</p>
         )}
         {showDeployDialog && deploy.data && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">

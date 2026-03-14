@@ -33,5 +33,10 @@ for (const skill of skillEntries) {
     .runCmd(`cat > ${skillDir}/SKILL.md << 'ENDOFSKILL'\n${skill.content}\nENDOFSKILL`);
 }
 
+// Install Playwright with Chromium for PDF export
+builder = builder
+  .runCmd("npm install playwright")
+  .runCmd("npx playwright install --with-deps chromium");
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const uiGeneratorTemplate = builder.skipCache();
