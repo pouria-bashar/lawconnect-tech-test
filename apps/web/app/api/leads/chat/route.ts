@@ -1,6 +1,6 @@
 import { createAgentChatHandler } from "@/lib/create-agent-chat-handler";
 
-export const maxDuration = 30;
+export const maxDuration = 120;
 
 const handler = createAgentChatHandler("leadAgent");
 export const POST = handler.POST;

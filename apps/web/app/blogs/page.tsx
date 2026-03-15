@@ -13,6 +13,7 @@ import { TiptapRenderToolUI } from "@/components/assistant-ui/tiptap-render-tool
 import { AskQuestionToolUI } from "@/components/assistant-ui/ask-question-tool";
 import { ChatLayout } from "@/components/chat-layout";
 import { useThreadMessages } from "@/lib/use-thread-messages";
+import { DEFAULT_MODEL } from "@/lib/model-config";
 
 const AGENT_ID = "blogAgent";
 const CHAT_API = "/api/blogs/chat";
@@ -74,7 +75,7 @@ function BlogsPageContent() {
 }
 
 function ChatRuntime({ threadId, initialMessages }: { threadId?: string; initialMessages?: import("ai").UIMessage[] }) {
-  const [selectedModel, setSelectedModel] = useState("anthropic/claude-sonnet-4-5");
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
 
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
