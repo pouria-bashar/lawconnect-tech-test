@@ -74,10 +74,21 @@ export interface RunOptions {
   onEvent?: (event: ClaudeStreamEvent) => void
 }
 
+const FIFTEEN_MINUTES_MS = 15 * 60 * 1000
+
+async function ensureSandboxTimeout(sbx: Awaited<ReturnType<typeof getSandbox>>) {
+  const info = await sbx.getInfo()
+  const remainingMs = new Date(info.endAt).getTime() - Date.now()
+  if (remainingMs < FIFTEEN_MINUTES_MS) {
+    await sbx.setTimeout(FIFTEEN_MINUTES_MS)
+  }
+}
+
 export async function runClaudeCode(instruction: string, options?: RunOptions): Promise<RunResult> {
   const start = Date.now()
   try {
     const sbx = await getSandbox()
+    await ensureSandboxTimeout(sbx)
 
     const escaped = `${instruction}`.replace(/'/g, "'\\''")
     const command = `claude -p '${escaped}' --dangerously-skip-permissions --model claude-opus-4-6 --output-format stream-json --verbose --continue`
