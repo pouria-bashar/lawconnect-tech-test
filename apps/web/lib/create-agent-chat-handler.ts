@@ -5,6 +5,7 @@ import { mastra } from "@/mastra";
 import { NextResponse } from "next/server";
 import { RequestContext } from "@mastra/core/request-context";
 import { MODEL_ID_KEY } from "@/lib/model-config";
+import { getUserId } from "@/lib/get-user-id";
 
 export type AgentName =
   | "leadAgent"
@@ -17,11 +18,14 @@ export function createAgentChatHandler(agentName: AgentName) {
   return {
     POST: async (req: Request): Promise<Response> => {
       const params = await req.json();
-      const { threadId, resourceId, modelId, themeId } = params;
+      const { threadId, modelId, themeId } = params;
 
       if (!threadId) {
         return new Response("threadId is required", { status: 400 });
       }
+
+      const userId = await getUserId();
+      const resourceId = `${userId}:${agentName}`;
 
       const requestContext = new RequestContext();
       if (modelId) requestContext.set(MODEL_ID_KEY, modelId);
@@ -35,7 +39,7 @@ export function createAgentChatHandler(agentName: AgentName) {
           requestContext,
           memory: {
             thread: threadId,
-            resource: resourceId ?? agentName,
+            resource: resourceId,
           },
         },
       });
@@ -45,7 +49,9 @@ export function createAgentChatHandler(agentName: AgentName) {
     GET: async (req: Request): Promise<Response> => {
       const { searchParams } = new URL(req.url);
       const threadId = searchParams.get("threadId") ?? "";
-      const resourceId = searchParams.get("resourceId") ?? agentName;
+
+      const userId = await getUserId();
+      const resourceId = `${userId}:${agentName}`;
 
       const memory = await mastra.getAgent(agentName).getMemory();
       let response = null;

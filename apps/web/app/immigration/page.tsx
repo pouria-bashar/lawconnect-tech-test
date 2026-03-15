@@ -89,7 +89,7 @@ function ChatRuntime({
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: CHAT_API,
-      body: { modelId: selectedModel, threadId, resourceId: AGENT_ID },
+      body: { modelId: selectedModel, threadId },
     }),
     messages: initialMessages,
   });

@@ -64,7 +64,7 @@ function ChatRuntime({ threadId, initialMessages }: { threadId?: string; initial
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
       api: CHAT_API,
-      body: { modelId: selectedModel, threadId, resourceId: AGENT_ID },
+      body: { modelId: selectedModel, threadId },
     }),
     adapters: { attachments: e2bAttachmentAdapter },
     messages: initialMessages,

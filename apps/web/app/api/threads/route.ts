@@ -2,6 +2,7 @@ import { mastra } from "@/mastra";
 import { NextResponse } from "next/server";
 import type { Memory } from "@mastra/memory";
 import type { AgentName } from "@/lib/create-agent-chat-handler";
+import { getUserId } from "@/lib/get-user-id";
 
 async function getMemory(agentId: string) {
   return (await mastra.getAgent(agentId as AgentName).getMemory()) as
@@ -16,13 +17,16 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "agentId required" }, { status: 400 });
   }
 
+  const userId = await getUserId();
+  const resourceId = `${userId}:${agentId}`;
+
   const memory = await getMemory(agentId);
   if (!memory) {
     return NextResponse.json({ threads: [] });
   }
 
   const result = await memory.listThreads({
-    filter: { resourceId: agentId },
+    filter: { resourceId },
   });
   const sorted = [...result.threads].sort(
     (a, b) =>
@@ -37,6 +41,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "agentId required" }, { status: 400 });
   }
 
+  const userId = await getUserId();
+  const resourceId = `${userId}:${agentId}`;
+
   const memory = await getMemory(agentId);
   if (!memory) {
     return NextResponse.json({ error: "no memory" }, { status: 500 });
@@ -46,7 +53,7 @@ export async function POST(req: Request) {
     thread: {
       id: threadId,
       title: "New Chat",
-      resourceId: agentId,
+      resourceId,
       metadata: {},
       createdAt: new Date(),
       updatedAt: new Date(),
