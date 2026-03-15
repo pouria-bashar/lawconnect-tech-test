@@ -46,6 +46,7 @@ import {
   FlaskConicalIcon,
   GlobeIcon,
   LoaderIcon,
+  SettingsIcon,
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -249,6 +250,12 @@ function UserMenu() {
             align="end"
             sideOffset={4}
           >
+            <DropdownMenuItem asChild>
+              <Link href="/settings">
+                <SettingsIcon className="size-4" />
+                Settings
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
               {resolvedTheme === "dark" ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
               {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
