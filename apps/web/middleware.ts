@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+const PUBLIC_ROUTES = [
+  "/api/synthetic-test/run",
+];
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -36,6 +40,11 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
+  }
+
+  // Allow public routes (no auth required)
+  if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
+    return supabaseResponse;
   }
 
   // Allow auth routes and auth callback

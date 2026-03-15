@@ -14,6 +14,7 @@ export async function runCode(code: string): Promise<RunResult> {
   try {
     await sbx.files.write("/home/user/test.spec.ts", code)
     // Run the test
+    await sbx.commands.run("npm install -D @playwright/test@latest")
     const result = await sbx.commands.run(
       "npx playwright test /home/user/test.spec.ts --reporter=list",
       { timeoutMs: 60_000 },
