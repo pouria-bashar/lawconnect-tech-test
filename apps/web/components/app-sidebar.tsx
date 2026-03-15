@@ -218,6 +218,14 @@ function ThreadList({
 function UserMenu() {
   const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
+  const [userEmail, setUserEmail] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? null);
+    });
+  }, []);
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -225,6 +233,8 @@ function UserMenu() {
     router.push("/login");
     router.refresh();
   }
+
+  const initials = userEmail ? userEmail.charAt(0).toUpperCase() : "U";
 
   return (
     <SidebarMenu>
@@ -236,10 +246,10 @@ function UserMenu() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarFallback className="rounded-lg">U</AvatarFallback>
+                <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">User</span>
+                <span className="truncate font-medium">{userEmail ?? "User"}</span>
               </div>
               <ChevronsUpDownIcon className="ml-auto size-4" />
             </SidebarMenuButton>
