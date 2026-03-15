@@ -8,6 +8,10 @@ export const queryKeys = {
     detail: (chatApiPath: string, threadId?: string) =>
       ["thread-messages", chatApiPath, threadId] as const,
   },
+  buildJob: {
+    all: ["build-job"] as const,
+    status: (jobId: string) => ["build-job", jobId] as const,
+  },
   syntheticTest: {
     all: ["synthetic-test"] as const,
     detail: (id: string) => ["synthetic-test", id] as const,

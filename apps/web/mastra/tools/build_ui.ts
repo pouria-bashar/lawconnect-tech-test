@@ -1,4 +1,5 @@
-import { runClaudeCode } from "@workspace/e2b/run-claude-code";
+import { startClaudeCode } from "@workspace/e2b/run-claude-code";
+import { createBuildJob } from "@workspace/db/queries/build-jobs";
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
@@ -14,33 +15,14 @@ export const buildUiTool = createTool({
       ),
   }),
   outputSchema: z.object({
-    url: z.string().describe("URL to the generated output file"),
-    outputType: z.enum(["html", "png", "pdf"]).describe("Type of the generated output"),
+    jobId: z.string().describe("ID of the build job to poll for status"),
+    status: z.enum(["running"]).describe("Initial status of the build"),
   }),
-  execute: async (input, context) => {
-    const processId = context?.agent?.toolCallId ?? crypto.randomUUID();
+  execute: async (input) => {
+    const { pid, sandboxId } = await startClaudeCode(input.instructions);
 
-    const result = await runClaudeCode(input.instructions, {
-      processId,
-      onEvent: (event) => {
-        void context?.writer?.custom({
-          type: "data-build-progress",
-          data: event,
-          transient: true,
-        });
-      },
-    });
+    const job = await createBuildJob({ pid, sandboxId });
 
-    if (result.status === "error") {
-      throw new Error(`Claude Code failed: ${result.errors}`);
-    }
-
-    if (!result.url) {
-      throw new Error(
-        `Claude Code did not generate an output file. Status: ${result.status}. Errors: ${result.errors}`,
-      );
-    }
-
-    return { url: result.url, outputType: result.outputType ?? "html" };
+    return { jobId: job.id, status: "running" as const };
   },
 });

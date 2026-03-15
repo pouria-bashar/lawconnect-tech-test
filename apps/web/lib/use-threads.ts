@@ -24,7 +24,7 @@ export function useThreads(agentId: string) {
       const data = await res.json();
       return (data.threads ?? []) as ThreadItem[];
     },
-    refetchInterval: 5000,
+    // refetchInterval: 5000,
   });
 
   const deleteMutation = useMutation({

@@ -1,13 +1,16 @@
+import { Sandbox } from "e2b"
 import { getSandbox } from "@workspace/e2b/sandbox"
-import { processRegistry } from "@workspace/e2b/process-registry"
 
 export type OutputType = "html" | "png" | "pdf"
+export type BuildJobStatus = "running" | "completed" | "failed" | "cancelled"
 
 const OUTPUT_FILES: { path: string; type: OutputType }[] = [
   { path: "/home/user/output.html", type: "html" },
   { path: "/home/user/output.png", type: "png" },
   { path: "/home/user/output.pdf", type: "pdf" },
 ]
+
+const BUILD_LOG_PATH = "/home/user/build-log.jsonl"
 
 export interface RunResult {
   status: "pass" | "fail" | "error"
@@ -69,11 +72,6 @@ function parseStreamEvent(line: string): ClaudeStreamEvent | null {
   }
 }
 
-export interface RunOptions {
-  processId?: string
-  onEvent?: (event: ClaudeStreamEvent) => void
-}
-
 const FIFTEEN_MINUTES_MS = 15 * 60 * 1000
 
 async function ensureSandboxTimeout(sbx: Awaited<ReturnType<typeof getSandbox>>) {
@@ -84,88 +82,127 @@ async function ensureSandboxTimeout(sbx: Awaited<ReturnType<typeof getSandbox>>)
   }
 }
 
-export async function runClaudeCode(instruction: string, options?: RunOptions): Promise<RunResult> {
-  const start = Date.now()
+async function connectSandbox(sandboxId: string): Promise<Sandbox> {
+  const apiKey = process.env.E2B_API_KEY
+  if (!apiKey) throw new Error("E2B_API_KEY environment variable is required")
+  return Sandbox.connect(sandboxId, { apiKey })
+}
+
+async function findOutputFile(sbx: Sandbox): Promise<{ url: string; outputType: OutputType } | null> {
+  for (const file of OUTPUT_FILES) {
+    try {
+      const url = await sbx.downloadUrl(file.path)
+      return { url, outputType: file.type }
+    } catch {
+      // File doesn't exist, try next
+    }
+  }
+  return null
+}
+
+// --- Fire-and-forget API ---
+
+export interface StartResult {
+  pid: number
+  sandboxId: string
+}
+
+/**
+ * Starts Claude Code in the sandbox and returns immediately without waiting.
+ * The process continues running in the background.
+ * Stdout is tee'd to a log file so it can be read by `checkBuildStatus`.
+ */
+export async function startClaudeCode(instruction: string): Promise<StartResult> {
+  const sbx = await getSandbox()
+  await ensureSandboxTimeout(sbx)
+
+  const escaped = `${instruction}`.replace(/'/g, "'\\''")
+  const command = `claude -p '${escaped}' --dangerously-skip-permissions --model claude-opus-4-6 --output-format stream-json --verbose --continue 2>&1 | tee ${BUILD_LOG_PATH}`
+
+  const handle = await sbx.commands.run(command, {
+    background: true,
+    timeoutMs: 0,
+  })
+
+  const info = await sbx.getInfo()
+
+  return {
+    pid: handle.pid,
+    sandboxId: info.sandboxId,
+  }
+}
+
+export interface BuildStatusResult {
+  status: BuildJobStatus
+  events: ClaudeStreamEvent[]
+  newOffset: number
+  result?: RunResult
+}
+
+/**
+ * Checks the status of a background build by connecting to the sandbox,
+ * reading new log lines, and checking if the process is still alive.
+ */
+export async function checkBuildStatus(
+  sandboxId: string,
+  pid: number,
+  logOffset: number = 0,
+): Promise<BuildStatusResult> {
+  const sbx = await connectSandbox(sandboxId)
+
+  // Read log + check processes in parallel
+  const [fullLog, processes] = await Promise.all([
+    sbx.files.read(BUILD_LOG_PATH).catch(() => ""),
+    sbx.commands.list(),
+  ])
+
+  // Parse new log lines into events
+  let newOffset = logOffset
+  const events: ClaudeStreamEvent[] = []
+  if (fullLog.length > logOffset) {
+    newOffset = fullLog.length
+    for (const line of fullLog.slice(logOffset).split("\n")) {
+      if (!line.trim()) continue
+      const event = parseStreamEvent(line)
+      if (event) events.push(event)
+    }
+  }
+
+  const isRunning = processes.some((p) => p.pid === pid)
+
+  if (isRunning) {
+    return { status: "running", events, newOffset }
+  }
+
+  // Process finished — collect output files
+  const output = await findOutputFile(sbx)
+
+  const result: RunResult = {
+    status: output ? "pass" : "fail",
+    logs: fullLog,
+    errors: "",
+    durationMs: 0,
+    url: output?.url,
+    outputType: output?.outputType,
+  }
+
+  return {
+    status: output ? "completed" : "failed",
+    events,
+    newOffset,
+    result,
+  }
+}
+
+/**
+ * Kills a running build process by PID.
+ */
+export async function killBuildProcess(sandboxId: string, pid: number): Promise<boolean> {
   try {
-    const sbx = await getSandbox()
-    await ensureSandboxTimeout(sbx)
-
-    const escaped = `${instruction}`.replace(/'/g, "'\\''")
-    const command = `claude -p '${escaped}' --dangerously-skip-permissions --model claude-opus-4-6 --output-format stream-json --verbose --continue`
-
-    const handle = await sbx.commands.run(command, {
-      background: true,
-      timeoutMs: 0,
-      onStdout: (data) => {
-        console.log(data)
-        if (options?.onEvent) {
-          const event = parseStreamEvent(data)
-          if (event) options.onEvent(event)
-        }
-      },
-      onStderr(data) {
-        console.log(data)
-      },
-    })
-
-    // Register kill function so the process can be cancelled
-    if (options?.processId) {
-      processRegistry.register(options.processId, () => handle.kill())
-    }
-
-    const result = await handle.wait()
-
-    // Clean up registry
-    if (options?.processId) {
-      processRegistry.remove(options.processId)
-    }
-
-    const durationMs = Date.now() - start
-
-    // Get download URL for the generated output file (try HTML, PNG, PDF in order)
-    let url: string | undefined
-    let outputType: OutputType | undefined
-    if (result.exitCode === 0) {
-      try {
-        const entries = await sbx.files.list("/home/user")
-        const fileNames = new Set(entries.map((e) => e.name))
-        for (const file of OUTPUT_FILES) {
-          const name = file.path.split("/").pop()!
-          if (fileNames.has(name)) {
-            url = await sbx.downloadUrl(file.path)
-            outputType = file.type
-            break
-          }
-        }
-      } catch {
-        // Directory listing failed, skip
-      }
-    }
-
-    return {
-      status: result.exitCode === 0 ? "pass" : "fail",
-      logs: result.stdout,
-      errors: result.stderr,
-      durationMs,
-      url,
-      outputType,
-    }
-  } catch (error: unknown) {
-    console.log(JSON.stringify(error), "????")
-
-    // Clean up registry on error
-    if (options?.processId) {
-      processRegistry.remove(options.processId)
-    }
-
-    const durationMs = Date.now() - start
-    const err = error as { stdout?: string; stderr?: string; message?: string }
-
-    return {
-      status: "error",
-      logs: err.stdout || "",
-      errors: err.stderr || err.message || "Unknown error",
-      durationMs,
-    }
+    const sbx = await connectSandbox(sandboxId)
+    const handle = await sbx.commands.connect(pid)
+    return await handle.kill()
+  } catch {
+    return false
   }
 }

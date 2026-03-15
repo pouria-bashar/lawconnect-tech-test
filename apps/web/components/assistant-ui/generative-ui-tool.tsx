@@ -1,50 +1,15 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { makeAssistantToolUI, makeAssistantDataUI } from "@assistant-ui/react";
-import type { ClaudeStreamEvent } from "@workspace/e2b/run-claude-code";
+import { makeAssistantToolUI } from "@assistant-ui/react";
 import { useDeploy } from "@/hooks/use-deploy";
 import { useExportPdf } from "@/hooks/use-export-pdf";
 import { useCancelBuild } from "@/hooks/use-cancel-build";
+import { useBuildPolling, type EventWithId } from "@/hooks/use-build-polling";
 
 const DeployContext = createContext<{ threadId?: string }>({});
 export function DeployProvider({ threadId, children }: { threadId?: string; children: React.ReactNode }) {
   return <DeployContext.Provider value={{ threadId }}>{children}</DeployContext.Provider>;
-}
-
-const MAX_EVENTS = 200;
-
-type EventWithId = ClaudeStreamEvent & { id: number };
-
-// Shared event bus: BuildProgressDataUI pushes events, tool UI consumes them
-type Listener = (event: ClaudeStreamEvent) => void;
-const listeners = new Set<Listener>();
-let nextEventId = 0;
-
-function useBuildProgress(isRunning: boolean) {
-  const [events, setEvents] = useState<EventWithId[]>([]);
-  const wasRunning = useRef(false);
-
-  // Reset events when a new tool run starts
-  useEffect(() => {
-    if (isRunning && !wasRunning.current) {
-      setEvents([]);
-    }
-    wasRunning.current = isRunning;
-  }, [isRunning]);
-
-  useEffect(() => {
-    const handler: Listener = (event) => {
-      const entry: EventWithId = { ...event, id: nextEventId++ };
-      setEvents((prev) =>
-        prev.length >= MAX_EVENTS ? [...prev.slice(-MAX_EVENTS + 1), entry] : [...prev, entry],
-      );
-    };
-    listeners.add(handler);
-    return () => { listeners.delete(handler); };
-  }, []);
-
-  return events;
 }
 
 const TOOL_LABELS: Record<string, string> = {
@@ -60,7 +25,7 @@ function truncate(str: string, max: number): string {
   return str.length > max ? str.slice(0, max) + "..." : str;
 }
 
-function formatEvent(event: ClaudeStreamEvent): string {
+function formatEvent(event: EventWithId): string {
   if (event.type === "tool_use" && event.toolName) {
     const label = TOOL_LABELS[event.toolName] ?? event.toolName;
     if (event.toolInput) {
@@ -156,54 +121,43 @@ function BuildProgress({ events }: { events: EventWithId[] }) {
   );
 }
 
-// Invisible data UI that captures streamed events and pushes into the shared listener
-export const BuildProgressDataUI = makeAssistantDataUI<ClaudeStreamEvent>({
-  name: "build-progress",
-  render: ({ data }) => {
-    const dispatched = useRef(false);
-    useEffect(() => {
-      if (dispatched.current) return;
-      dispatched.current = true;
-      listeners.forEach((fn) => fn(data));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-    return null;
-  },
-});
-
 export const GenerativeUiToolUI = makeAssistantToolUI<
   { instructions: string },
-  { url: string; outputType: "html" | "png" | "pdf" }
+  { jobId: string; status: "running" }
 >({
   toolName: "build_ui",
-  render: function GenerativeUiRender({ result, status, toolCallId }) {
+  render: function GenerativeUiRender({ result, status }) {
     const { threadId } = useContext(DeployContext);
     const [isExpanded, setIsExpanded] = useState(true);
     const [showDeployDialog, setShowDeployDialog] = useState(false);
-    const loading = status.type === "running";
-    const events = useBuildProgress(loading);
+
+    const jobId = result?.jobId;
+    const { events, buildResult, buildStatus } = useBuildPolling(jobId);
 
     const deploy = useDeploy();
     const exportPdf = useExportPdf();
     const cancel = useCancelBuild();
 
+    const handleCancel = () => {
+      if (jobId) cancel.mutate(jobId);
+    };
+
+    const isBuilding = status.type === "running" || buildStatus === "running";
+    const finalUrl = buildResult?.url;
+    const finalOutputType = buildResult?.outputType;
+
     const handleDeploy = () => {
-      if (!result?.url) return;
+      if (!finalUrl) return;
       deploy.mutate(
-        { url: result.url, scriptName: threadId ? `genui-${threadId}` : undefined },
+        { url: finalUrl, scriptName: threadId ? `genui-${threadId}` : undefined },
         { onSuccess: () => setShowDeployDialog(true) },
       );
     };
 
-    const handleCancel = () => {
-      if (!toolCallId) return;
-      cancel.mutate(toolCallId);
-    };
-
     const handleExportPdf = () => {
-      if (!result?.url) return;
+      if (!finalUrl) return;
       exportPdf.mutate(
-        { url: result.url },
+        { url: finalUrl },
         {
           onSuccess: (data) => {
             const a = document.createElement("a");
@@ -217,15 +171,16 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
       );
     };
 
-    if (!result) {
+    // Building state
+    if (isBuilding) {
       return (
         <div className="my-8 rounded-xl border bg-muted/30 p-4">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              {cancel.isPending ? "Cancelling..." : loading ? "Building your UI..." : "Waiting for result..."}
+              {cancel.isPending ? "Cancelling..." : "Building your UI..."}
             </div>
-            {loading && !cancel.isPending && (
+            {!cancel.isPending && (
               <button
                 type="button"
                 onClick={handleCancel}
@@ -240,8 +195,38 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
       );
     }
 
-    if (!result.url) return null;
+    // Cancelled or failed
+    if (buildStatus === "cancelled") {
+      return (
+        <div className="my-8 rounded-xl border bg-muted/30 p-4">
+          <p className="text-sm text-muted-foreground">Build was cancelled.</p>
+          {events.length > 0 && <BuildProgress events={events} />}
+        </div>
+      );
+    }
 
+    if (buildStatus === "failed" && !finalUrl) {
+      return (
+        <div className="my-8 rounded-xl border bg-muted/30 p-4">
+          <p className="text-sm text-destructive">Build failed. No output was generated.</p>
+          {events.length > 0 && <BuildProgress events={events} />}
+        </div>
+      );
+    }
+
+    // No result yet (waiting for tool to return)
+    if (!finalUrl) {
+      return (
+        <div className="my-8 rounded-xl border bg-muted/30 p-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            Waiting for result...
+          </div>
+        </div>
+      );
+    }
+
+    // Completed with result
     return (
       <div className="my-8 w-full">
         {events.length > 0 && <BuildProgress events={events} />}
@@ -255,7 +240,7 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
             {isExpanded ? "Collapse" : "Expand"} preview
           </button>
           <div className="flex items-center gap-2">
-            {result.outputType === "html" && (
+            {finalOutputType === "html" && (
               <>
                 {deploy.data ? (
                   <button
@@ -300,13 +285,13 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
               </>
             )}
             <a
-              href={result.url}
+              href={finalUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-              {...((result.outputType === "png" || result.outputType === "pdf") ? { download: "" } : {})}
+              {...((finalOutputType === "png" || finalOutputType === "pdf") ? { download: "" } : {})}
             >
-              {(result.outputType === "png" || result.outputType === "pdf") ? "Download" : "Open in new tab"} &rarr;
+              {(finalOutputType === "png" || finalOutputType === "pdf") ? "Download" : "Open in new tab"} &rarr;
             </a>
           </div>
         </div>
@@ -369,20 +354,20 @@ export const GenerativeUiToolUI = makeAssistantToolUI<
             </div>
           </div>
         )}
-        {isExpanded && (result.outputType === "png" ? (
+        {isExpanded && (finalOutputType === "png" ? (
           <img
-            src={result.url}
+            src={finalUrl}
             alt="Generated output"
             className="w-full rounded-xl border bg-white object-contain"
             style={{ maxHeight: "600px" }}
           />
         ) : (
           <iframe
-            src={result.url}
+            src={finalUrl}
             sandbox="allow-scripts allow-same-origin"
             className="w-full rounded-xl border bg-white"
             style={{ height: "600px" }}
-            title={result.outputType === "pdf" ? "Generated PDF" : "Generated UI"}
+            title={finalOutputType === "pdf" ? "Generated PDF" : "Generated UI"}
           />
         ))}
       </div>

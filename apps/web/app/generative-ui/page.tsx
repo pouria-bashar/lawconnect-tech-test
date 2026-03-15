@@ -9,7 +9,7 @@ import {
 } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
-import { GenerativeUiToolUI, BuildProgressDataUI, DeployProvider, FindFileToolUI } from "@/components/assistant-ui/generative-ui-tool";
+import { GenerativeUiToolUI, DeployProvider, FindFileToolUI } from "@/components/assistant-ui/generative-ui-tool";
 import { DEFAULT_MODEL } from "@/lib/model-config";
 import { e2bAttachmentAdapter } from "@/lib/e2b-attachment-adapter";
 import { ChatLayout } from "@/components/chat-layout";
@@ -75,7 +75,6 @@ function ChatRuntime({ threadId, initialMessages }: { threadId?: string; initial
       <DeployProvider threadId={threadId}>
         <GenerativeUiToolUI />
         <FindFileToolUI />
-        <BuildProgressDataUI />
         <div className="relative h-dvh">
           <Thread
             config={{

@@ -19,7 +19,6 @@
   "exports": {
     "./sandbox": "./src/sandbox.ts",
     "./run-claude-code": "./src/run-claude-code.ts",
-    "./run-code": "./src/run-code.ts",
-    "./process-registry": "./src/process-registry.ts"
+    "./run-code": "./src/run-code.ts"
   }
 }
