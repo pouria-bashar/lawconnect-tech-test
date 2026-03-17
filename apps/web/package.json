@@ -8,7 +8,7 @@
     "build": "next build",
     "mastra:dev": "mastra dev --dir ./mastra",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint --fix",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "remotion:studio": "remotion studio remotion-compositions/index.ts",
