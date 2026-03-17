@@ -1,5 +1,9 @@
 # Project Guidelines
 
+## Imports
+
+Always use `@/` path aliases for internal imports in `apps/web/`. Never use relative imports (`../`, `./`). The tsconfig maps `@/*` to `./*`.
+
 ## Data Fetching
 
 Always use `@tanstack/react-query` for data fetching operations (queries, mutations, polling). Never use raw `fetch` in `useEffect` or manual polling loops.

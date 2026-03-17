@@ -15,7 +15,10 @@
     "CLAUDE_CODE_OAUTH_TOKEN",
     "CF_API_TOKEN",
     "CF_ACCOUNT_ID",
-    "CF_DISPATCH_NAMESPACE"
+    "CF_DISPATCH_NAMESPACE",
+    "PHOENIX_API_KEY",
+    "PHOENIX_ENDPOINT",
+    "PHOENIX_PROJECT_NAME"
   ],
   "tasks": {
     "build": {

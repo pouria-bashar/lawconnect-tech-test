@@ -13,12 +13,15 @@
     "typecheck": "tsc --noEmit",
     "remotion:studio": "remotion studio remotion-compositions/index.ts",
     "remotion:render": "remotion render remotion-compositions/index.ts MyComposition out.mp4",
-    "build:template": "turbo run build:template --filter=@workspace/e2b"
+    "build:template": "turbo run build:template --filter=@workspace/e2b",
+    "eval:lead": "tsx mastra/evals/experiments/lead-agent.experiment.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.58",
     "@ai-sdk/google": "^3.0.43",
     "@ai-sdk/openai": "^3.0.41",
+    "@arizeai/phoenix-client": "^6.5.0",
+    "@arizeai/phoenix-evals": "^1.0.0",
     "@assistant-ui/core": "^0.1.5",
     "@assistant-ui/react": "^0.12.16",
     "@assistant-ui/react-ai-sdk": "^1.3.13",
@@ -28,10 +31,12 @@
     "@json-render/react-pdf": "^0.12.0",
     "@json-render/shadcn": "^0.12.0",
     "@mastra/ai-sdk": "^1.1.2",
+    "@mastra/arize": "^1.0.8",
     "@mastra/auth-supabase": "^1.0.0",
-    "@mastra/core": "^1.12.0",
+    "@mastra/core": "^1.13.2",
     "@mastra/mcp": "^1.1.0",
     "@mastra/memory": "^1.7.0",
+    "@mastra/observability": "^1.5.0",
     "@mastra/pg": "^1.8.0",
     "@monaco-editor/react": "^4.7.0",
     "@phosphor-icons/react": "^2.1.10",
@@ -87,6 +92,7 @@
     "@workspace/typescript-config": "workspace:*",
     "eslint": "^9.39.2",
     "mastra": "^1.3.9",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }
