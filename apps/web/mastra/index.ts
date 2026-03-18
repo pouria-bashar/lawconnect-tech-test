@@ -1,14 +1,14 @@
 import { Mastra } from "@mastra/core"
 import { ArizeExporter } from "@mastra/arize"
 import { Observability } from "@mastra/observability"
-import { leadAgent } from "./agents/leadAgent"
+import { leadAgent } from "./agents/lead-agent"
 import { PostgresStore } from "@mastra/pg"
 
-import { blogAgent } from "./agents/blogAgent"
-import { syntheticTestAgent } from "./agents/syntheticTestAgent"
-import { immigrationResearchAgent } from "./agents/immigrationAgent"
-import { codingAgent } from "./agents/codingAgent"
-import { fullStackAgent } from "./agents/fullStackAgent"
+import { blogAgent } from "./agents/blog-agent"
+import { syntheticTestAgent } from "./agents/synthetic-test-agent"
+import { immigrationResearchAgent } from "./agents/immigration-agent"
+import { codingAgent } from "./agents/coding-agent"
+import { fullStackAgent } from "./agents/full-stack-agent"
 
 const storage = new PostgresStore({
   id: "pg-storage",
