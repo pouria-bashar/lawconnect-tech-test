@@ -141,7 +141,32 @@ function ThreadList({
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentThreadId = searchParams?.get("thread") ?? undefined;
-  const { threads, isLoading, deleteThread } = useThreads(agentId);
+  const {
+    threads,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    deleteThread,
+  } = useThreads(agentId);
+
+  const loadMoreRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const buildHref = React.useCallback(
     (threadId: string) => `${pathname}?thread=${threadId}`,
@@ -210,6 +235,17 @@ function ThreadList({
                 </SidebarMenuItem>
               );
             })}
+
+        {/* Infinite scroll sentinel */}
+        <div ref={loadMoreRef} className="h-1" />
+        {isFetchingNextPage && (
+          <SidebarMenuItem>
+            <SidebarMenuButton>
+              <LoaderIcon className="size-3 animate-spin" />
+              <span className="text-muted-foreground text-xs">Loading more...</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
       </SidebarMenu>
     </SidebarGroup>
   );

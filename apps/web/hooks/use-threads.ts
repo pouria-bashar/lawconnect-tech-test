@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 
 export interface ThreadItem {
@@ -13,19 +13,32 @@ export interface ThreadItem {
   metadata?: Record<string, unknown>;
 }
 
+const PER_PAGE = 10;
+
 export function useThreads(agentId: string) {
   const queryClient = useQueryClient();
   const key = queryKeys.threads.list(agentId);
 
-  const { data: threads = [], isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: key,
-    queryFn: async () => {
-      const res = await fetch(`/api/threads?agentId=${agentId}`);
-      const data = await res.json();
-      return (data.threads ?? []) as ThreadItem[];
+    queryFn: async ({ pageParam = 0 }) => {
+      const res = await fetch(
+        `/api/threads?agentId=${agentId}&page=${pageParam}&perPage=${PER_PAGE}`,
+      );
+      return res.json() as Promise<{ threads: ThreadItem[]; hasMore: boolean }>;
     },
-    // refetchInterval: 5000,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.hasMore ? lastPageParam + 1 : undefined,
   });
+
+  const threads = data?.pages.flatMap((page) => page.threads) ?? [];
 
   const deleteMutation = useMutation({
     mutationFn: async (threadId: string) => {
@@ -48,5 +61,13 @@ export function useThreads(agentId: string) {
     [deleteMutation]
   );
 
-  return { threads, isLoading, refetch, deleteThread };
+  return {
+    threads,
+    isLoading,
+    hasNextPage: hasNextPage ?? false,
+    fetchNextPage,
+    isFetchingNextPage,
+    refetch,
+    deleteThread,
+  };
 }

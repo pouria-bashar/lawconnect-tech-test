@@ -17,22 +17,28 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "agentId required" }, { status: 400 });
   }
 
+  const page = Math.max(0, Number(searchParams.get("page") ?? 0));
+  const perPage = Math.max(1, Math.min(100, Number(searchParams.get("perPage") ?? 10)));
+
   const userId = await getUserId();
   const resourceId = `${userId}:${agentId}`;
 
   const memory = await getMemory(agentId);
   if (!memory) {
-    return NextResponse.json({ threads: [] });
+    return NextResponse.json({ threads: [], hasMore: false });
   }
 
   const result = await memory.listThreads({
     filter: { resourceId },
+    orderBy: { field: "updatedAt", direction: "DESC" },
+    page,
+    perPage,
   });
-  const sorted = [...result.threads].sort(
-    (a, b) =>
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-  );
-  return NextResponse.json({ threads: sorted });
+
+  return NextResponse.json({
+    threads: result.threads,
+    hasMore: result.threads.length === perPage,
+  });
 }
 
 export async function POST(req: Request) {
