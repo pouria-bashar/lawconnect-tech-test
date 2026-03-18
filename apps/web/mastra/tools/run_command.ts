@@ -28,6 +28,8 @@ export const runCommandTool = createTool({
 
       const result = await sbx.commands.run(input.command, {
         timeoutMs: input.timeoutMs ?? 30000,
+        onStderr: console.log,
+        onStdout: console.log
       });
 
       return {

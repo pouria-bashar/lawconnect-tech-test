@@ -11,7 +11,8 @@ const CHAT_ROUTES = [
   "/blogs",
   "/synthetic-test",
   "/immigration",
-];
+  "/fullstack-apps",
+]
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
