@@ -16,26 +16,6 @@ const storage = new PostgresStore({
 })
 
 
-console.log(
-  JSON.stringify({
-    configs: {
-      arize: {
-        serviceName: process.env.PHOENIX_PROJECT_NAME || "lawconnect",
-        exporters: [
-          new ArizeExporter({
-            endpoint:
-              process.env.PHOENIX_ENDPOINT ||
-              "https://app.phoenix.arize.com/v1/traces",
-            apiKey: process.env.PHOENIX_API_KEY,
-            projectName: process.env.PHOENIX_PROJECT_NAME || "lawconnect",
-          }),
-        ],
-      },
-    },
-  })
-)
-
-
 export const mastra = new Mastra({
   agents: {
     leadAgent,
