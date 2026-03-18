@@ -5,6 +5,14 @@ const PUBLIC_ROUTES = [
   "/api/synthetic-test/run",
 ];
 
+const CHAT_ROUTES = [
+  "/lead-capture",
+  "/generative-ui",
+  "/blogs",
+  "/synthetic-test",
+  "/immigration",
+];
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -68,6 +76,18 @@ export async function middleware(request: NextRequest) {
     }
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Assign a thread ID to chat routes that don't have one yet.
+  // Placed after auth so unauthenticated users redirect straight to /login
+  // without an unnecessary intermediate redirect.
+  if (
+    CHAT_ROUTES.includes(pathname) &&
+    !request.nextUrl.searchParams.has("thread")
+  ) {
+    const url = request.nextUrl.clone();
+    url.searchParams.set("thread", crypto.randomUUID());
     return NextResponse.redirect(url);
   }
 
