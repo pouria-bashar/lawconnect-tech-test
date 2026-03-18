@@ -8,6 +8,7 @@ import { blogAgent } from "./agents/blogAgent"
 import { syntheticTestAgent } from "./agents/syntheticTestAgent"
 import { immigrationResearchAgent } from "./agents/immigrationAgent"
 import { codingAgent } from "./agents/codingAgent"
+import { fullStackAgent } from "./agents/fullStackAgent"
 
 const storage = new PostgresStore({
   id: "pg-storage",
@@ -23,6 +24,7 @@ export const mastra = new Mastra({
     syntheticTestAgent,
     immigrationResearchAgent,
     codingAgent,
+    fullStackAgent,
   },
   storage,
   observability: new Observability({

@@ -12,7 +12,8 @@ export type AgentName =
   | "blogAgent"
   | "syntheticTestAgent"
   | "immigrationResearchAgent"
-  | "codingAgent";
+  | "fullStackAgent"
+  | "codingAgent"
 
 export function createAgentChatHandler(agentName: AgentName) {
   return {
