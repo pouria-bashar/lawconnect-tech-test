@@ -19,6 +19,15 @@ const skillEntries = readdirSync(skillsDir, { withFileTypes: true })
     content: readFileSync(join(skillsDir, d.name, "SKILL.md"), "utf-8"),
   }));
 
+// Read all agents from the agents/ directory
+const agentsDir = join(__dirname, "agents");
+const agentEntries = readdirSync(agentsDir, { withFileTypes: true })
+  .filter((f) => f.isFile() && f.name.endsWith(".md"))
+  .map((f) => ({
+    name: f.name,
+    content: readFileSync(join(agentsDir, f.name), "utf-8"),
+  }));
+
 // Build the template
 let builder: any = Template()
   .fromTemplate("mcp-gateway")
@@ -31,6 +40,14 @@ for (const skill of skillEntries) {
   builder = builder
     .runCmd(`mkdir -p ${skillDir}`)
     .runCmd(`cat > ${skillDir}/SKILL.md << 'ENDOFSKILL'\n${skill.content}\nENDOFSKILL`);
+}
+
+// Write each agent
+for (const agent of agentEntries) {
+  const agentPath = `/home/user/.claude/agents/${agent.name}`;
+  builder = builder
+    .runCmd(`mkdir -p /home/user/.claude/agents`)
+    .runCmd(`cat > ${agentPath} << 'ENDOFAGENT'\n${agent.content}\nENDOFAGENT`);
 }
 
 // Install Playwright with Chromium for PDF export
