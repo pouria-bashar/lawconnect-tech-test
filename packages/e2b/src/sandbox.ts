@@ -40,6 +40,8 @@ export async function getSandbox(): Promise<Sandbox> {
     envs: {
       GEMINI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
       CLAUDE_CODE_OAUTH_TOKEN: process.env.CLAUDE_CODE_OAUTH_TOKEN!,
+      CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN!,
+      CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID!,
     },
   })
 }
