@@ -9,7 +9,7 @@ import {
 } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
 import type { Suggestion } from "@/components/assistant-ui/thread";
-import { useThreadMessages } from "@/lib/use-thread-messages";
+import { useThreadMessages } from "@/hooks/use-thread-messages";
 import { DEFAULT_MODEL } from "@/lib/model-config";
 
 export interface ChatPageConfig {

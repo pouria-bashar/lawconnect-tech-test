@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/client";
-import { useThreads } from "@/lib/use-threads";
+import { useThreads } from "@/hooks/use-threads";
 import {
   Sidebar,
   SidebarContent,
