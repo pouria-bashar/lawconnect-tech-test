@@ -46,6 +46,13 @@ const projects = [
     href: "/generative-ui",
     color: "text-pink-500",
   },
+  {
+    title: "Full Stack Apps",
+    description:
+      "Describe any full stack app you want — login forms, landing pages, dashboards, resumes — and watch the AI build it live with interactive components.",
+    href: "/fullstack-apps",
+    color: "text-rose-500",
+  },
 ];
 
 export default function HomePage() {

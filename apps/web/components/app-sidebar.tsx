@@ -42,6 +42,7 @@ import {
   MoonIcon,
   UserSearchIcon,
   LayoutDashboardIcon,
+  AppWindowIcon,
   PenLineIcon,
   FlaskConicalIcon,
   GlobeIcon,
@@ -52,6 +53,7 @@ import {
 const NAV_LINKS = [
   { href: "/lead-capture", label: "Lead Capture", icon: UserSearchIcon },
   { href: "/generative-ui", label: "Generative UI", icon: LayoutDashboardIcon },
+  { href: "/fullstack-apps", label: "Full Stack Apps", icon: AppWindowIcon },
   { href: "/blogs", label: "Blogs", icon: PenLineIcon },
   { href: "/synthetic-test", label: "Tests", icon: FlaskConicalIcon },
   { href: "/immigration", label: "Immigration", icon: GlobeIcon },
@@ -60,6 +62,7 @@ const NAV_LINKS = [
 const AGENT_BY_PATH: Record<string, string> = {
   "/lead-capture": "leadAgent",
   "/generative-ui": "codingAgent",
+  "/fullstack-apps": "codingAgent",
   "/blogs": "blogAgent",
   "/synthetic-test": "syntheticTestAgent",
   "/immigration": "immigrationResearchAgent",
