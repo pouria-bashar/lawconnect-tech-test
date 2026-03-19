@@ -124,7 +124,8 @@ function FileNode({
 
 export function SandboxEditorDialog({ onClose }: { onClose: () => void }) {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
-  const [editorContent, setEditorContent] = useState<string | null>(null);
+  // Draft keyed by path — when selectedPath changes, draft for the old path is ignored automatically
+  const [draft, setDraft] = useState<{ path: string; content: string } | null>(null);
   const { data: treeData, isLoading: treeLoading, error: treeError } = useSandboxFileTree();
   const { data: fileData, isLoading: fileLoading } = useSandboxFile(selectedPath);
   const saveFile = useSaveFile();
@@ -132,17 +133,9 @@ export function SandboxEditorDialog({ onClose }: { onClose: () => void }) {
   const treeContainerRef = useRef<HTMLDivElement>(null);
   const [treeHeight, setTreeHeight] = useState(500);
 
-  // Reset editor content when file changes
-  useEffect(() => {
-    setEditorContent(null);
-  }, [selectedPath]);
-
-  // Sync editor content when file loads
-  useEffect(() => {
-    if (fileData?.content !== undefined && editorContent === null) {
-      setEditorContent(fileData.content);
-    }
-  }, [fileData?.content, editorContent]);
+  // Derive editor content: use draft if it's for the current file, otherwise fall back to loaded content
+  const editorContent = draft?.path === selectedPath ? draft.content : (fileData?.content ?? null);
+  const isDirty = draft?.path === selectedPath && draft.content !== fileData?.content;
 
   useEffect(() => {
     if (!treeContainerRef.current) return;
@@ -154,12 +147,10 @@ export function SandboxEditorDialog({ onClose }: { onClose: () => void }) {
     return () => ro.disconnect();
   }, []);
 
-  const isDirty = editorContent !== null && editorContent !== fileData?.content;
-
   const handleSave = useCallback(() => {
-    if (!selectedPath || !isDirty || editorContent === null) return;
-    saveFile.mutate({ path: selectedPath, content: editorContent });
-  }, [selectedPath, isDirty, editorContent, saveFile]);
+    if (!selectedPath || !isDirty || draft?.path !== selectedPath) return;
+    saveFile.mutate({ path: selectedPath, content: draft.content });
+  }, [selectedPath, isDirty, draft, saveFile]);
 
   // Cmd+S / Ctrl+S to save
   useEffect(() => {
@@ -258,7 +249,7 @@ export function SandboxEditorDialog({ onClose }: { onClose: () => void }) {
                 height="100%"
                 language={getLanguage(selectedPath)}
                 value={editorContent ?? ""}
-                onChange={(val) => setEditorContent(val ?? "")}
+                onChange={(val) => selectedPath && setDraft({ path: selectedPath, content: val ?? "" })}
                 theme="vs-dark"
                 beforeMount={(monaco) => {
                   monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
