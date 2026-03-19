@@ -4,14 +4,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Tree, type NodeApi } from "react-arborist";
 import MonacoEditor from "@monaco-editor/react";
 import {
-  ChevronRightIcon,
-  FileCode2Icon,
+  CaretRightIcon,
   FileIcon,
-  FileJsonIcon,
-  FileTextIcon,
+  FileTsIcon,
+  FileTsxIcon,
+  FileJsIcon,
+  FileJsxIcon,
+  FileCssIcon,
+  FileHtmlIcon,
+  FileMdIcon,
+  FileSqlIcon,
+  FileIniIcon,
+  FileCodeIcon,
   FolderIcon,
   FolderOpenIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Button } from "@workspace/ui/components/button";
 import { useSandboxFileTree, useSandboxFile, useSaveFile, type FileTreeNode } from "@/hooks/use-sandbox-editor";
 
@@ -30,29 +37,32 @@ function FileTypeIcon({ name }: { name: string }) {
   const ext = name.split(".").pop()?.toLowerCase() ?? "";
   switch (ext) {
     case "ts":
+      return <FileTsIcon size={14} weight="duotone" className="shrink-0 text-blue-400" />;
     case "tsx":
-      return <FileCode2Icon className="size-3.5 shrink-0 text-blue-400" />;
+      return <FileTsxIcon size={14} weight="duotone" className="shrink-0 text-blue-400" />;
     case "js":
+      return <FileJsIcon size={14} weight="duotone" className="shrink-0 text-yellow-400" />;
     case "jsx":
-      return <FileCode2Icon className="size-3.5 shrink-0 text-yellow-400" />;
-    case "json":
-      return <FileJsonIcon className="size-3.5 shrink-0 text-yellow-300" />;
-    case "html":
-      return <FileCode2Icon className="size-3.5 shrink-0 text-orange-400" />;
+      return <FileJsxIcon size={14} weight="duotone" className="shrink-0 text-yellow-400" />;
     case "css":
-      return <FileCode2Icon className="size-3.5 shrink-0 text-sky-400" />;
+      return <FileCssIcon size={14} weight="duotone" className="shrink-0 text-sky-400" />;
+    case "html":
+      return <FileHtmlIcon size={14} weight="duotone" className="shrink-0 text-orange-400" />;
     case "md":
-      return <FileTextIcon className="size-3.5 shrink-0 text-slate-400" />;
+      return <FileMdIcon size={14} weight="duotone" className="shrink-0 text-slate-400" />;
+    case "sql":
+      return <FileSqlIcon size={14} weight="duotone" className="shrink-0 text-pink-400" />;
     case "toml":
+    case "ini":
+      return <FileIniIcon size={14} weight="duotone" className="shrink-0 text-purple-400" />;
+    case "json":
+      return <FileCodeIcon size={14} weight="duotone" className="shrink-0 text-yellow-300" />;
     case "yaml":
     case "yml":
-      return <FileTextIcon className="size-3.5 shrink-0 text-purple-400" />;
     case "sh":
-      return <FileCode2Icon className="size-3.5 shrink-0 text-green-400" />;
-    case "sql":
-      return <FileCode2Icon className="size-3.5 shrink-0 text-pink-400" />;
+      return <FileCodeIcon size={14} weight="duotone" className="shrink-0 text-muted-foreground" />;
     default:
-      return <FileIcon className="size-3.5 shrink-0 text-muted-foreground" />;
+      return <FileIcon size={14} weight="duotone" className="shrink-0 text-muted-foreground" />;
   }
 }
 
@@ -90,8 +100,9 @@ function FileNode({
     >
       {/* Chevron — only for folders */}
       {node.isInternal ? (
-        <ChevronRightIcon
-          className={`size-3 shrink-0 transition-transform ${node.isOpen ? "rotate-90" : ""}`}
+        <CaretRightIcon
+          size={12}
+          className={`shrink-0 transition-transform ${node.isOpen ? "rotate-90" : ""}`}
         />
       ) : (
         <span className="size-3 shrink-0" />
@@ -100,8 +111,8 @@ function FileNode({
       {/* Folder or file icon */}
       {node.isInternal ? (
         node.isOpen
-          ? <FolderOpenIcon className="size-3.5 shrink-0 text-yellow-400" />
-          : <FolderIcon className="size-3.5 shrink-0 text-yellow-400" />
+          ? <FolderOpenIcon size={14} weight="duotone" className="shrink-0 text-yellow-400" />
+          : <FolderIcon size={14} weight="duotone" className="shrink-0 text-yellow-400" />
       ) : (
         <FileTypeIcon name={node.data.name} />
       )}
@@ -249,6 +260,16 @@ export function SandboxEditorDialog({ onClose }: { onClose: () => void }) {
                 value={editorContent ?? ""}
                 onChange={(val) => setEditorContent(val ?? "")}
                 theme="vs-dark"
+                beforeMount={(monaco) => {
+                  monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+                    noSemanticValidation: true,
+                    noSyntaxValidation: true,
+                  });
+                  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+                    noSemanticValidation: true,
+                    noSyntaxValidation: true,
+                  });
+                }}
                 options={{
                   minimap: { enabled: false },
                   scrollBeyondLastLine: false,
