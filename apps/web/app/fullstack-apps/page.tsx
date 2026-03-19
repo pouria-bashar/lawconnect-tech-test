@@ -2,11 +2,8 @@
 
 import { ChatPage } from "@/components/chat-page";
 import type { ChatPageConfig } from "@/components/chat-page";
-import {
-  GenerativeUiToolUI,
-  DeployProvider,
-  FindFileToolUI,
-} from "@/components/assistant-ui/generative-ui-tool";
+import { FullStackAppToolUI } from "@/components/assistant-ui/full-stack-app-tool";
+import { FindFileToolUI } from "@/components/assistant-ui/generative-ui-tool";
 import { e2bAttachmentAdapter } from "@/lib/e2b-attachment-adapter";
 
 const CONFIG: ChatPageConfig = {
@@ -54,13 +51,10 @@ export default function Page() {
       config={CONFIG}
       toolUIs={
         <>
-          <GenerativeUiToolUI />
+          <FullStackAppToolUI />
           <FindFileToolUI />
         </>
       }
-      contentWrapper={({ threadId, children }) => (
-        <DeployProvider threadId={threadId}>{children}</DeployProvider>
-      )}
     />
   );
 }

@@ -1,6 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { getModelFromContext } from "@/lib/model-config";
-import { buildUiTool } from "../tools/build_ui";
+import { buildFullStackAppTool } from "../tools/build_full_stack_app";
 import { findFileTool } from "../tools/find_file";
 import { runCommandTool } from "../tools/run_command";
 import { sharedMemory } from "../memory";
@@ -32,11 +32,11 @@ Once you have enough information, summarize what you understood in plain languag
 > "Here's what I understood: [summary]. Does this sound right, or is there anything to adjust?"
 
 ### Step 4 — Call the build tool
-After confirmation, call the \`build_ui\` tool with a PRD as the instruction. The PRD must describe **what** to build, not **how**. It should read like a product brief, not a technical spec.
+After confirmation, call the \`build_full_stack_app\` tool with a PRD as the instruction. The PRD must describe **what** to build, not **how**. It should read like a product brief, not a technical spec.
 
-## WRITING THE PRD (instruction to build_ui)
+## WRITING THE PRD (instruction to build_full_stack_app)
 
-The PRD you pass to \`build_ui\` must include:
+The PRD you pass to \`build_full_stack_app\` must include:
 
 **App name & purpose** — one sentence describing what the app does and who it's for.
 
@@ -61,8 +61,8 @@ Do NOT include: tech stack choices, database schemas, API design, deployment ins
 - Never output code yourself
 - Never mention Cloudflare, Workers, D1, or any technology to the user
 - Keep your questions and responses conversational and concise
-- After \`build_ui\` returns, briefly tell the user what was built and offer to iterate`,
+- After \`build_full_stack_app\` returns, briefly tell the user what was built and offer to iterate`,
   model: ({ requestContext }) => getModelFromContext(requestContext),
   memory: sharedMemory,
-  tools: { build_ui: buildUiTool, find_file: findFileTool, run_command: runCommandTool },
+  tools: { build_full_stack_app: buildFullStackAppTool, find_file: findFileTool, run_command: runCommandTool },
 });
