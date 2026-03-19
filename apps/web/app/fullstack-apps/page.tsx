@@ -1,12 +1,15 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { ChatPage } from "@/components/chat-page";
 import type { ChatPageConfig } from "@/components/chat-page";
 import { FullStackAppToolUI } from "@/components/assistant-ui/full-stack-app-tool";
 import { FindFileToolUI } from "@/components/assistant-ui/generative-ui-tool";
+import { SandboxEditorDialog } from "@/components/assistant-ui/sandbox-editor-dialog";
+import { Button } from "@workspace/ui/components/button";
 import { e2bAttachmentAdapter } from "@/lib/e2b-attachment-adapter";
 
-const CONFIG: ChatPageConfig = {
+const BASE_CONFIG = {
   chatApi: "/api/fullstack-apps/chat",
   maxWidth: "64rem",
   composerPlaceholder: "Describe the full stack app you want to build...",
@@ -43,18 +46,34 @@ const CONFIG: ChatPageConfig = {
       description: "KPI cards, progress bars, recent activity table",
     },
   ],
-};
+} satisfies Omit<ChatPageConfig, "composerActions">;
 
 export default function Page() {
+  const [showEditor, setShowEditor] = useState(false);
+
+  const config = useMemo<ChatPageConfig>(() => ({
+    ...BASE_CONFIG,
+    composerActions: (
+      <Button variant="outline" size="xs" onClick={() => setShowEditor(true)}>
+        Open editor
+      </Button>
+    ),
+  }), []);
+
   return (
-    <ChatPage
-      config={CONFIG}
-      toolUIs={
-        <>
-          <FullStackAppToolUI />
-          <FindFileToolUI />
-        </>
-      }
-    />
+    <>
+      {showEditor && (
+        <SandboxEditorDialog onClose={() => setShowEditor(false)} />
+      )}
+      <ChatPage
+        config={config}
+        toolUIs={
+          <>
+            <FullStackAppToolUI />
+            <FindFileToolUI />
+          </>
+        }
+      />
+    </>
   );
 }

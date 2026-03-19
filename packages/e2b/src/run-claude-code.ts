@@ -206,3 +206,55 @@ export async function killBuildProcess(sandboxId: string, pid: number): Promise<
     return false
   }
 }
+
+export interface FileTreeNode {
+  id: string
+  name: string
+  children?: FileTreeNode[]
+}
+
+async function buildTree(sbx: Sandbox, path: string, depth: number): Promise<FileTreeNode[]> {
+  if (depth === 0) return []
+  try {
+    const entries = await sbx.files.list(path)
+    const nodes = await Promise.all(
+      entries.map(async (entry) => {
+        if (entry.type === "dir") {
+          const children = await buildTree(sbx, entry.path, depth - 1)
+          return { id: entry.path, name: entry.name, children }
+        }
+        return { id: entry.path, name: entry.name }
+      })
+    )
+    return nodes.sort((a, b) => {
+      const aIsDir = Array.isArray(a.children)
+      const bIsDir = Array.isArray(b.children)
+      if (aIsDir !== bIsDir) return aIsDir ? -1 : 1
+      return a.name.localeCompare(b.name)
+    })
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Returns the file tree for a sandbox starting at the given root path.
+ */
+export async function getSandboxFileTree(
+  sbx: Sandbox,
+  root = "/home/user",
+): Promise<FileTreeNode[]> {
+  return buildTree(sbx, root, 5)
+}
+
+/**
+ * Reads the content of a file in the sandbox.
+ */
+export async function readSandboxFile(sbx: Sandbox, path: string): Promise<string> {
+  const content = await sbx.files.read(path)
+  return typeof content === "string" ? content : new TextDecoder().decode(content as Uint8Array)
+}
+
+export async function writeSandboxFile(sbx: Sandbox, path: string, content: string): Promise<void> {
+  await sbx.files.write(path, content)
+}

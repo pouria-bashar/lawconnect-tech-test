@@ -29,26 +29,8 @@ const agentEntries = readdirSync(agentsDir, { withFileTypes: true })
   }));
 
 // Build the template
-let builder: any = Template()
+let builder = Template()
   .fromTemplate("mcp-gateway")
-  // Write CLAUDE.md
-  .runCmd(`cat > /home/user/CLAUDE.md << 'ENDOFCLAUDEMD'\n${claudeMd}\nENDOFCLAUDEMD`);
-
-// Write each skill
-for (const skill of skillEntries) {
-  const skillDir = `/home/user/.claude/skills/${skill.name}`;
-  builder = builder
-    .runCmd(`mkdir -p ${skillDir}`)
-    .runCmd(`cat > ${skillDir}/SKILL.md << 'ENDOFSKILL'\n${skill.content}\nENDOFSKILL`);
-}
-
-// Write each agent
-for (const agent of agentEntries) {
-  const agentPath = `/home/user/.claude/agents/${agent.name}`;
-  builder = builder
-    .runCmd(`mkdir -p /home/user/.claude/agents`)
-    .runCmd(`cat > ${agentPath} << 'ENDOFAGENT'\n${agent.content}\nENDOFAGENT`);
-}
 
 // Install Playwright with Chromium for PDF export
 builder = builder
@@ -67,7 +49,11 @@ builder = builder
   // Login to GitHub
   .runCmd([
     `bash -lc "gh auth login --with-token <<< '${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}'"`,
-  ]);
+  ])
+  // Clone app-builder repo into /home/user/.claude
+  .gitClone(`https://${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}@github.com/aibuilder-ai/app-builder.git`, "/home/user/.claude")
+  // Remove .git to avoid exposing credentials baked into the clone URL
+  .runCmd("rm -rf /home/user/.claude/.git");
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const uiGeneratorTemplate = builder.skipCache();

@@ -21,6 +21,7 @@ export interface ChatPageConfig {
   defaultModel?: string;
   maxWidth?: string;
   adapters?: NonNullable<Parameters<typeof useChatRuntime>[0]>["adapters"];
+  composerActions?: React.ReactNode;
 }
 
 export interface ChatPageProps {
@@ -117,6 +118,7 @@ function ChatRuntime({
             ...(config.help && { help: config.help }),
             selectedModel,
             onModelChange: setSelectedModel,
+            composerActions: config.composerActions,
           }}
         />
       </div>

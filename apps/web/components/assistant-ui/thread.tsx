@@ -68,6 +68,7 @@ export type ThreadConfig = {
   selectedTheme?: string;
   onThemeChange?: (theme: string) => void;
   help?: HelpConfig;
+  composerActions?: ReactNode;
 };
 
 export const Thread: FC<{ config: ThreadConfig }> = ({ config }) => {
@@ -106,6 +107,7 @@ export const Thread: FC<{ config: ThreadConfig }> = ({ config }) => {
             selectedTheme={config.selectedTheme}
             onThemeChange={config.onThemeChange}
             help={config.help}
+            composerActions={config.composerActions}
           />
         </ThreadPrimitive.ViewportFooter>
       </ThreadPrimitive.Viewport>
@@ -185,7 +187,8 @@ const Composer: FC<{
   selectedTheme?: string;
   onThemeChange?: (theme: string) => void;
   help?: HelpConfig;
-}> = ({ placeholder, selectedModel, onModelChange, selectedTheme, onThemeChange, help }) => {
+  composerActions?: ReactNode;
+}> = ({ placeholder, selectedModel, onModelChange, selectedTheme, onThemeChange, help, composerActions }) => {
   return (
     <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-2xl border border-input bg-background px-1 pt-2 outline-none transition-shadow has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-ring/20">
       <ComposerAttachments />
@@ -202,6 +205,7 @@ const Composer: FC<{
         selectedTheme={selectedTheme}
         onThemeChange={onThemeChange}
         help={help}
+        composerActions={composerActions}
       />
     </ComposerPrimitive.Root>
   );
@@ -213,7 +217,8 @@ const ComposerAction: FC<{
   selectedTheme?: string;
   onThemeChange?: (theme: string) => void;
   help?: HelpConfig;
-}> = ({ selectedModel, onModelChange, selectedTheme, onThemeChange, help }) => {
+  composerActions?: ReactNode;
+}> = ({ selectedModel, onModelChange, selectedTheme, onThemeChange, help, composerActions }) => {
   return (
     <div className="aui-composer-action-wrapper relative mx-2 mb-2 flex items-center justify-between">
       <div className="flex items-center gap-1">
@@ -261,34 +266,37 @@ const ComposerAction: FC<{
           </select>
         )}
       </div>
-      <AuiIf condition={(s) => !s.thread.isRunning}>
-        <ComposerPrimitive.Send asChild>
-          <TooltipIconButton
-            tooltip="Send message"
-            side="bottom"
-            type="button"
-            variant="default"
-            size="icon"
-            className="aui-composer-send size-8 rounded-full"
-            aria-label="Send message"
-          >
-            <ArrowUpIcon className="aui-composer-send-icon size-4" />
-          </TooltipIconButton>
-        </ComposerPrimitive.Send>
-      </AuiIf>
-      <AuiIf condition={(s) => s.thread.isRunning}>
-        <ComposerPrimitive.Cancel asChild>
-          <Button
-            type="button"
-            variant="default"
-            size="icon"
-            className="aui-composer-cancel size-8 rounded-full"
-            aria-label="Stop generating"
-          >
-            <SquareIcon className="aui-composer-cancel-icon size-3 fill-current" />
-          </Button>
-        </ComposerPrimitive.Cancel>
-      </AuiIf>
+      <div className="flex items-center gap-1.5">
+        {composerActions}
+        <AuiIf condition={(s) => !s.thread.isRunning}>
+          <ComposerPrimitive.Send asChild>
+            <TooltipIconButton
+              tooltip="Send message"
+              side="bottom"
+              type="button"
+              variant="default"
+              size="icon"
+              className="aui-composer-send size-8 rounded-full"
+              aria-label="Send message"
+            >
+              <ArrowUpIcon className="aui-composer-send-icon size-4" />
+            </TooltipIconButton>
+          </ComposerPrimitive.Send>
+        </AuiIf>
+        <AuiIf condition={(s) => s.thread.isRunning}>
+          <ComposerPrimitive.Cancel asChild>
+            <Button
+              type="button"
+              variant="default"
+              size="icon"
+              className="aui-composer-cancel size-8 rounded-full"
+              aria-label="Stop generating"
+            >
+              <SquareIcon className="aui-composer-cancel-icon size-3 fill-current" />
+            </Button>
+          </ComposerPrimitive.Cancel>
+        </AuiIf>
+      </div>
     </div>
   );
 };
