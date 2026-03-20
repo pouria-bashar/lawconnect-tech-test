@@ -6,7 +6,6 @@ import { fileURLToPath } from "url";
 export const UI_GENERATOR_TEMPLATE = "ui-generator-template";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 
 // Build the template
