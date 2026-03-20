@@ -8,25 +8,6 @@ export const UI_GENERATOR_TEMPLATE = "ui-generator-template";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const claudeMd = readFileSync(join(__dirname, "CLAUDE.md"), "utf-8");
-
-// Read all skills from the skills/ directory
-const skillsDir = join(__dirname, "skills");
-const skillEntries = readdirSync(skillsDir, { withFileTypes: true })
-  .filter((d) => d.isDirectory())
-  .map((d) => ({
-    name: d.name,
-    content: readFileSync(join(skillsDir, d.name, "SKILL.md"), "utf-8"),
-  }));
-
-// Read all agents from the agents/ directory
-const agentsDir = join(__dirname, "agents");
-const agentEntries = readdirSync(agentsDir, { withFileTypes: true })
-  .filter((f) => f.isFile() && f.name.endsWith(".md"))
-  .map((f) => ({
-    name: f.name,
-    content: readFileSync(join(agentsDir, f.name), "utf-8"),
-  }));
 
 // Build the template
 let builder = Template()
@@ -53,7 +34,9 @@ builder = builder
   // Clone app-builder repo into /home/user/.claude
   .gitClone(`https://${process.env.GITHUB_PERSONAL_ACCESS_TOKEN}@github.com/aibuilder-ai/app-builder.git`, "/home/user/.claude")
   // Remove .git to avoid exposing credentials baked into the clone URL
-  .runCmd("rm -rf /home/user/.claude/.git");
+  .runCmd("rm -rf /home/user/.claude/.git")
+  // Move CLAUDE.md from cloned repo to /home/user
+  .runCmd("mv /home/user/.claude/CLAUDE.md /home/user/CLAUDE.md");
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const uiGeneratorTemplate = builder.skipCache();
