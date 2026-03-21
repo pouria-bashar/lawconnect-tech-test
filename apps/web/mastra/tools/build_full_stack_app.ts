@@ -18,8 +18,9 @@ export const buildFullStackAppTool = createTool({
     jobId: z.string().describe("ID of the build job to poll for status"),
     status: z.enum(["running"]).describe("Initial status of the build"),
   }),
-  execute: async (input) => {
-    const { pid, sandboxId } = await startClaudeCode(input.instructions);
+  execute: async (input, context) => {
+    const projectId = context.requestContext?.get("threadId") as string | undefined;
+    const { pid, sandboxId } = await startClaudeCode(input.instructions, projectId);
 
     const job = await createBuildJob({ pid, sandboxId });
 

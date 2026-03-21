@@ -112,8 +112,8 @@ export interface StartResult {
  * The process continues running in the background.
  * Stdout is tee'd to a log file so it can be read by `checkBuildStatus`.
  */
-export async function startClaudeCode(instruction: string): Promise<StartResult> {
-  const sbx = await getSandbox()
+export async function startClaudeCode(instruction: string, sandboxId?: string): Promise<StartResult> {
+  const sbx = await getSandbox(sandboxId)
   await ensureSandboxTimeout(sbx)
 
   const escaped = `${instruction}`.replace(/'/g, "'\\''")

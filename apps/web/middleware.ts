@@ -11,7 +11,6 @@ const CHAT_ROUTES = [
   "/blogs",
   "/synthetic-test",
   "/immigration",
-  "/fullstack-apps",
 ]
 
 export async function middleware(request: NextRequest) {
@@ -77,6 +76,13 @@ export async function middleware(request: NextRequest) {
     }
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect /fullstack-apps to /fullstack-apps/[uuid] — no intermediate chat page.
+  if (pathname === "/fullstack-apps") {
+    const url = request.nextUrl.clone();
+    url.pathname = `/fullstack-apps/${crypto.randomUUID()}`;
     return NextResponse.redirect(url);
   }
 

@@ -123,6 +123,137 @@ function FileNode({
   );
 }
 
+export function SandboxEditorPanel() {
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [draft, setDraft] = useState<{ path: string; content: string } | null>(null);
+  const { data: treeData, isLoading: treeLoading, error: treeError } = useSandboxFileTree();
+  const { data: fileData, isLoading: fileLoading } = useSandboxFile(selectedPath);
+  const saveFile = useSaveFile();
+  const treeContainerRef = useRef<HTMLDivElement>(null);
+  const [treeHeight, setTreeHeight] = useState(500);
+
+  const editorContent = draft?.path === selectedPath ? draft.content : (fileData?.content ?? null);
+  const isDirty = draft?.path === selectedPath && draft.content !== fileData?.content;
+
+  useEffect(() => {
+    if (!treeContainerRef.current) return;
+    const ro = new ResizeObserver((entries) => {
+      const h = entries[0]?.contentRect.height;
+      if (h) setTreeHeight(h);
+    });
+    ro.observe(treeContainerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const handleSave = useCallback(() => {
+    if (!selectedPath || !isDirty || draft?.path !== selectedPath) return;
+    saveFile.mutate({ path: selectedPath, content: draft.content });
+  }, [selectedPath, isDirty, draft, saveFile]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleSave]);
+
+  return (
+    <div className="flex h-full flex-col overflow-hidden bg-background">
+      <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <h3 className="text-sm font-semibold">Editor</h3>
+          {selectedPath && (
+            <span className="text-xs text-muted-foreground truncate">
+              {selectedPath.split("/").pop()}
+            </span>
+          )}
+          {isDirty && <span className="text-xs text-muted-foreground">· Unsaved</span>}
+        </div>
+        {selectedPath && (
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={handleSave}
+            disabled={!isDirty || saveFile.isPending}
+          >
+            {saveFile.isPending ? "Saving..." : "Save"}
+          </Button>
+        )}
+      </div>
+      <div className="flex flex-1 overflow-hidden">
+        <div ref={treeContainerRef} className="w-56 shrink-0 border-r overflow-y-auto bg-muted/20 py-2 px-3">
+          {treeLoading && <p className="text-xs text-muted-foreground">Loading files...</p>}
+          {treeError && <p className="text-xs text-destructive">Failed to load files</p>}
+          {treeData?.tree && (
+            <Tree<FileTreeNode>
+              data={treeData.tree}
+              openByDefault={false}
+              width={176}
+              height={treeHeight}
+              indent={12}
+              rowHeight={24}
+              disableDrag
+              disableDrop
+            >
+              {({ node, style, dragHandle }) => (
+                <FileNode
+                  node={node}
+                  style={style}
+                  dragHandle={dragHandle ?? undefined}
+                  onSelectFile={setSelectedPath}
+                  selectedPath={selectedPath}
+                />
+              )}
+            </Tree>
+          )}
+        </div>
+        <div className="flex-1 overflow-hidden">
+          {!selectedPath && (
+            <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+              Select a file to edit
+            </div>
+          )}
+          {selectedPath && fileLoading && (
+            <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+              Loading...
+            </div>
+          )}
+          {selectedPath && !fileLoading && (
+            <MonacoEditor
+              height="100%"
+              language={getLanguage(selectedPath)}
+              value={editorContent ?? ""}
+              onChange={(val) => selectedPath && setDraft({ path: selectedPath, content: val ?? "" })}
+              theme="vs-dark"
+              beforeMount={(monaco) => {
+                monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+                  noSemanticValidation: true,
+                  noSyntaxValidation: true,
+                });
+                monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+                  noSemanticValidation: true,
+                  noSyntaxValidation: true,
+                });
+              }}
+              options={{
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                lineNumbers: "on",
+                wordWrap: "on",
+              }}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SandboxEditorDialog({ onClose }: { onClose: () => void }) {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   // Draft keyed by path — when selectedPath changes, draft for the old path is ignored automatically

@@ -31,6 +31,7 @@ export function createAgentChatHandler(agentName: AgentName) {
       const requestContext = new RequestContext();
       if (modelId) requestContext.set(MODEL_ID_KEY, modelId);
       if (themeId) requestContext.set("themeId", themeId);
+      requestContext.set("threadId", threadId);
 
       const stream = await handleChatStream({
         mastra,

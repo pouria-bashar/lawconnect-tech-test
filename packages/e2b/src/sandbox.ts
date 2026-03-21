@@ -2,7 +2,7 @@ import { Sandbox } from "e2b";
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 
-export async function getSandbox(): Promise<Sandbox> {
+export async function getSandbox(id?: string): Promise<Sandbox> {
   const apiKey = process.env.E2B_API_KEY;
   if (!apiKey) {
     throw new Error("E2B_API_KEY environment variable is required");
@@ -13,7 +13,7 @@ export async function getSandbox(): Promise<Sandbox> {
     10,
   );
   const template = process.env.E2B_TEMPLATE || "ui-generator-template";
-  const sandboxId = process.env.E2B_SANDBOX_ID || "ui-generator";
+  const sandboxId = id ?? process.env.E2B_SANDBOX_ID ?? "ui-generator";
 
   // Find existing sandbox by metadata
   const paginator = await Sandbox.list({
