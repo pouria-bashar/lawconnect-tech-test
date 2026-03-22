@@ -112,12 +112,13 @@ export interface StartResult {
  * The process continues running in the background.
  * Stdout is tee'd to a log file so it can be read by `checkBuildStatus`.
  */
-export async function startClaudeCode(instruction: string, sandboxId?: string): Promise<StartResult> {
+export async function startClaudeCode(instruction: string, sandboxId?: string, cwd?: string): Promise<StartResult> {
   const sbx = await getSandbox(sandboxId)
   await ensureSandboxTimeout(sbx)
 
   const escaped = `${instruction}`.replace(/'/g, "'\\''")
-  const command = `claude -p '${escaped}' --dangerously-skip-permissions --model claude-opus-4-6 --output-format stream-json --verbose --continue 2>&1 | tee ${BUILD_LOG_PATH}`
+  const cdPrefix = cwd ? `cd ${cwd} && ` : ""
+  const command = `${cdPrefix}claude -p '${escaped}' --dangerously-skip-permissions --model claude-opus-4-6 --output-format stream-json --verbose --continue 2>&1 | tee ${BUILD_LOG_PATH}`
 
   const handle = await sbx.commands.run(command, {
     background: true,

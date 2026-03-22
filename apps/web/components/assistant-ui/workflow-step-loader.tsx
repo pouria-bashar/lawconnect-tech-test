@@ -13,6 +13,23 @@ type StepConfig = {
 };
 
 const CONFIGS: Record<string, StepConfig> = {
+  setup: {
+    eyebrow: "Setup Phase",
+    titleStart: "Scaffolding your",
+    titleItalic: "project",
+    stages: [
+      { label: "Spinning up sandbox...", pct: 10 },
+      { label: "Installing boilerplate...", pct: 25 },
+      { label: "Setting up packages...", pct: 42 },
+      { label: "Configuring workspace...", pct: 58 },
+      { label: "Linking dependencies...", pct: 74 },
+      { label: "Preparing environment...", pct: 89 },
+      { label: "Almost ready...", pct: 97 },
+    ],
+    swatchColors: ["#a78bfa", "#7c3aed", "#ddd6fe", "#4c1d95", "#ede9fe", "#6d28d9", "#8b5cf6"],
+    accentColor: "#a78bfa",
+    accentFaded: "rgba(167,139,250,0.3)",
+  },
   design: {
     eyebrow: "Design Phase",
     titleStart: "Building your",
@@ -67,7 +84,7 @@ const CONFIGS: Record<string, StepConfig> = {
 };
 
 interface WorkflowStepLoaderProps {
-  step: "design" | "planning" | "implementation";
+  step: "setup" | "design" | "planning" | "implementation";
 }
 
 export function WorkflowStepLoader({ step }: WorkflowStepLoaderProps) {

@@ -2,6 +2,7 @@ import { stitch } from "@google/stitch-sdk";
 import { NextResponse } from "next/server";
 import { getStitchProjectByProjectId } from "@workspace/db/queries/fullstack-apps";
 import { getSandbox } from "@workspace/e2b/sandbox";
+import { toSlug } from "@/mastra/tools/setup_project";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -14,7 +15,6 @@ export async function GET(req: Request) {
     );
   }
 
-  
   const record = await getStitchProjectByProjectId(projectId);
   
   if (!record) {
@@ -26,13 +26,16 @@ export async function GET(req: Request) {
     return NextResponse.json({ screens: [] });
   }
 
-  const sbx = await getSandbox();
+  const sbx = await getSandbox(projectId);
+  const projectDir = `/home/user/${toSlug(record.title)}`;
+  const designsDir = `${projectDir}/designs`;
+  await sbx.commands.run(`mkdir -p ${designsDir}`);
 
   const screensWithPreview = await Promise.all(
     screens.map(async (screen) => {
       const stitchHtmlUrl = await screen.getHtml();
       const htmlContent = await fetch(stitchHtmlUrl).then((r) => r.text());
-      const sandboxPath = `/home/user/designs/${record.stitchProjectId}-${screen.id}.html`;
+      const sandboxPath = `${designsDir}/${record.stitchProjectId}-${screen.id}.html`;
       await sbx.files.write(sandboxPath, htmlContent);
       const previewUrl = await sbx.downloadUrl(sandboxPath);
       return { screenId: screen.id, htmlUrl: previewUrl };

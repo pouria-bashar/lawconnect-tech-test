@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getWorkflowSnapshot, type WorkflowSnapshot } from "@workspace/db/queries/mastra-workflows";
 
 type WorkflowPhase =
+  | "setup"
   | "design"
   | "design_suspended"
   | "planning"
@@ -10,16 +11,18 @@ type WorkflowPhase =
   | null;
 
 function derivePhase(snapshot: WorkflowSnapshot): WorkflowPhase {
-  const steps = snapshot.steps ?? {};
-  const design = steps["design"];
-  const planning = steps["planning"];
-  const impl = steps["implementation"];
+  const ctx = snapshot.context ?? {};
+  const setup = ctx["setup"];
+  const design = ctx["design"];
+  const planning = ctx["planning"];
+  const impl = ctx["implementation"];
 
   if (impl?.status === "success") return "completed";
   if (planning?.status === "success" || impl?.status === "running") return "implementation";
   if (design?.status === "success" || planning?.status === "running") return "planning";
   if (design?.status === "suspended") return "design_suspended";
-  return "design";
+  if (setup?.status === "success" || design?.status === "running") return "design";
+  return "setup";
 }
 
 export async function GET(req: Request): Promise<Response> {
@@ -37,8 +40,10 @@ export async function GET(req: Request): Promise<Response> {
   }
 
   const phase = derivePhase(snapshot);
-  const plan = (snapshot.steps?.["planning"]?.output?.["plan"] as string) ?? null;
-  const jobId = (snapshot.steps?.["implementation"]?.output?.["jobId"] as string) ?? null;
+  const ctx = snapshot.context ?? {};
+  const plan = (ctx["planning"]?.output?.["plan"] as string) ?? null;
+  const jobId = (ctx["implementation"]?.output?.["jobId"] as string) ?? null;
+  const projectDir = (ctx["setup"]?.output?.["projectDir"] as string) ?? null;
 
-  return NextResponse.json({ phase, plan, jobId });
+  return NextResponse.json({ phase, plan, jobId, projectDir });
 }

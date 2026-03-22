@@ -5,13 +5,14 @@ import { readSandboxFile, writeSandboxFile } from "@workspace/e2b/run-claude-cod
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const path = searchParams.get("path");
+  const projectId = searchParams.get("projectId") ?? undefined;
 
   if (!path) {
     return NextResponse.json({ error: "path query param required" }, { status: 400 });
   }
 
   try {
-    const sbx = await getSandbox();
+    const sbx = await getSandbox(projectId);
     const content = await readSandboxFile(sbx, path);
     return NextResponse.json({ content });
   } catch (error) {
@@ -23,6 +24,7 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
   const { searchParams } = new URL(req.url);
   const path = searchParams.get("path");
+  const projectId = searchParams.get("projectId") ?? undefined;
 
   if (!path) {
     return NextResponse.json({ error: "path query param required" }, { status: 400 });
@@ -31,7 +33,7 @@ export async function PUT(req: Request) {
   const { content } = await req.json();
 
   try {
-    const sbx = await getSandbox();
+    const sbx = await getSandbox(projectId);
     await writeSandboxFile(sbx, path, content);
     return NextResponse.json({ ok: true });
   } catch (error) {

@@ -1,14 +1,15 @@
 import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 
-type SnapshotStepResult = {
+export type SnapshotStepResult = {
   status: "success" | "failed" | "suspended" | "running" | "waiting" | "skipped";
   output?: Record<string, unknown>;
+  suspendPayload?: Record<string, unknown>;
 };
 
 export type WorkflowSnapshot = {
   status: string;
-  steps?: Record<string, SnapshotStepResult>;
+  context?: Record<string, SnapshotStepResult>;
 };
 
 export async function getWorkflowSnapshot(

@@ -18,7 +18,7 @@ export const queryKeys = {
     reports: (id: string) => ["synthetic-test-reports", id] as const,
   },
   sandboxEditor: {
-    tree: () => ["sandbox-editor", "tree"] as const,
+    tree: (projectId: string) => ["sandbox-editor", "tree", projectId] as const,
     file: (path: string) => ["sandbox-editor", "file", path] as const,
   },
   designScreens: {

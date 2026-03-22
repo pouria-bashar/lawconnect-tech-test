@@ -2,15 +2,19 @@
 
 import { type WorkflowPhase } from "@/hooks/use-workflow-status";
 
-type Phase = { id: WorkflowPhase; label: string };
+export type ViewPhase = "setup" | "design" | "planning" | "implementation";
+
+type Phase = { id: ViewPhase; label: string };
 
 const PHASES: Phase[] = [
+  { id: "setup", label: "Setup" },
   { id: "design", label: "Design" },
   { id: "planning", label: "Planning" },
   { id: "implementation", label: "Building" },
 ];
 
 const PHASE_ORDER: WorkflowPhase[] = [
+  "setup",
   "design",
   "design_suspended",
   "planning",
@@ -22,7 +26,13 @@ function phaseIndex(phase: WorkflowPhase): number {
   return PHASE_ORDER.indexOf(phase);
 }
 
-export function WorkflowPhaseBar({ phase }: { phase: WorkflowPhase }) {
+interface WorkflowPhaseBarProps {
+  phase: WorkflowPhase;
+  viewingPhase?: ViewPhase | null;
+  onPhaseClick?: (phase: ViewPhase) => void;
+}
+
+export function WorkflowPhaseBar({ phase, viewingPhase, onPhaseClick }: WorkflowPhaseBarProps) {
   if (!phase) return null;
 
   const currentIdx = phaseIndex(phase);
@@ -33,31 +43,35 @@ export function WorkflowPhaseBar({ phase }: { phase: WorkflowPhase }) {
         const stepPhaseIdx = phaseIndex(p.id);
         const done =
           currentIdx >
-          (p.id === "design"
-            ? phaseIndex("design_suspended")
-            : stepPhaseIdx);
+          (p.id === "design" ? phaseIndex("design_suspended") : stepPhaseIdx);
         const active =
           p.id === "design"
-            ? currentIdx <= phaseIndex("design_suspended")
+            ? currentIdx >= phaseIndex("design") && currentIdx <= phaseIndex("design_suspended")
             : currentIdx === stepPhaseIdx ||
               (p.id === "implementation" && phase === "completed");
         const pending = !done && !active;
+        const viewing = viewingPhase === p.id;
+        const clickable = (done || active) && !!onPhaseClick;
 
         return (
           <div key={p.id} className="flex items-center gap-1">
             {i > 0 && (
               <span className="text-muted-foreground/40 text-xs mx-1">→</span>
             )}
-            <div
+            <button
+              disabled={pending || !clickable}
+              onClick={() => clickable && onPhaseClick(p.id)}
               className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
-                done
-                  ? "bg-primary/10 text-primary"
-                  : active
+                pending
+                  ? "text-muted-foreground/50 cursor-default"
+                  : viewing
                     ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground/50"
+                    : done
+                      ? "bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer"
+                      : "bg-primary text-primary-foreground cursor-pointer"
               }`}
             >
-              {done && <span>✓</span>}
+              {done && !viewing && <span>✓</span>}
               {active && !done && (
                 <span className="inline-block h-2 w-2 rounded-full bg-current animate-pulse" />
               )}
@@ -65,7 +79,7 @@ export function WorkflowPhaseBar({ phase }: { phase: WorkflowPhase }) {
                 <span className="inline-block h-2 w-2 rounded-full bg-muted-foreground/30" />
               )}
               {p.label}
-            </div>
+            </button>
           </div>
         );
       })}

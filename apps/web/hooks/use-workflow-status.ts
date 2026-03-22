@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 
 export type WorkflowPhase =
+  | "setup"
   | "design"
   | "design_suspended"
   | "planning"
@@ -15,6 +16,7 @@ export type WorkflowStatus = {
   phase: WorkflowPhase;
   plan: string | null;
   jobId: string | null;
+  projectDir: string | null;
 };
 
 export function useWorkflowStatus(projectId: string | null) {
