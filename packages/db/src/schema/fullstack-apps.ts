@@ -16,3 +16,4 @@ export const stitchProjects = fullstackAppsSchema.table("stitch_projects", {
 
 export type InsertStitchProject = typeof stitchProjects.$inferInsert;
 export type SelectStitchProject = typeof stitchProjects.$inferSelect;
+

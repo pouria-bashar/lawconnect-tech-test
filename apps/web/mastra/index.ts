@@ -10,6 +10,8 @@ import { immigrationResearchAgent } from "./agents/immigration-agent"
 import { codingAgent } from "./agents/coding-agent"
 import { fullStackAgent } from "./agents/full-stack-agent"
 import { designAgent } from "./agents/design-agent"
+import { planningAgent } from "./agents/planning-agent"
+import { fullStackWorkflow } from "./workflows/full-stack-workflow"
 
 const storage = new PostgresStore({
   id: "pg-storage",
@@ -27,6 +29,10 @@ export const mastra = new Mastra({
     codingAgent,
     fullStackAgent,
     designAgent,
+    planningAgent,
+  },
+  workflows: {
+    fullStackWorkflow,
   },
   storage,
   observability: new Observability({

@@ -11,9 +11,13 @@ import { FullStackAppToolUI } from "@/components/assistant-ui/full-stack-app-too
 import { FindFileToolUI } from "@/components/assistant-ui/generative-ui-tool";
 import { DesignToolUI } from "@/components/assistant-ui/design-tool";
 import { SandboxEditorPanel } from "@/components/assistant-ui/sandbox-editor-dialog";
+import { WorkflowPhaseBar } from "@/components/assistant-ui/workflow-phase-bar";
+import { DesignReviewPanel } from "@/components/assistant-ui/design-review-panel";
+import { WorkflowStepLoader } from "@/components/assistant-ui/workflow-step-loader";
 import { e2bAttachmentAdapter } from "@/lib/e2b-attachment-adapter";
 import { useThreadMessages } from "@/hooks/use-thread-messages";
 import { useDesignScreens } from "@/hooks/use-design-html";
+import { useWorkflowStatus } from "@/hooks/use-workflow-status";
 import { useChatSidebar } from "@/hooks/use-chat-sidebar";
 import { DEFAULT_MODEL } from "@/lib/model-config";
 
@@ -122,8 +126,10 @@ function RightPanel({
   const [tab, setTab] = useState<RightTab>("design");
   const [selectedScreenId, setSelectedScreenId] = useState<string | null>(null);
 
-  const { data } = useDesignScreens(projectId);
-  const screens = data?.screens ?? [];
+  const { data: workflowData } = useWorkflowStatus(projectId);
+  const phase = workflowData?.phase ?? null;
+  const { data: designData } = useDesignScreens(projectId, phase);
+  const screens = designData?.screens ?? [];
 
   useEffect(() => {
     if (screens.length > 0) {
@@ -132,10 +138,19 @@ function RightPanel({
     }
   }, [screens.length, selectedScreenId, tab]);
 
+  useEffect(() => {
+    if ((phase === "implementation" || phase === "completed") && tab !== "code") {
+      setTab("code");
+    }
+  }, [phase, tab]);
+
   const selectedHtmlUrl = screens.find((s) => s.screenId === selectedScreenId)?.htmlUrl ?? null;
+  const isDesignSuspended = phase === "design_suspended";
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
+      <WorkflowPhaseBar phase={phase} />
+
       <div className="flex items-center border-b shrink-0">
         <TabButton active={tab === "design"} onClick={() => setTab("design")}>
           Design
@@ -145,50 +160,73 @@ function RightPanel({
         </TabButton>
       </div>
 
-      <div className="flex flex-1 w-full overflow-hidden">
+      <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
         {tab === "design" ? (
-          screens.length === 0 ? (
-            <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-              Design will appear here once generated
-            </div>
-          ) : (
-            <>
-              {screens.length > 1 && (
-                <div className="w-36 shrink-0 border-r overflow-y-auto bg-muted/20 py-2 px-2 flex flex-col gap-1">
-                  {screens.map((screen, i) => (
-                    <button
-                      key={screen.screenId}
-                      onClick={() => setSelectedScreenId(screen.screenId)}
-                      className={`rounded px-2 py-1.5 text-left text-xs transition-colors ${
-                        selectedScreenId === screen.screenId
-                          ? "bg-primary/10 text-primary font-medium"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      }`}
-                    >
-                      Screen {i + 1}
-                    </button>
-                  ))}
+          <>
+            <div className="flex flex-1 min-h-0 overflow-hidden">
+              {screens.length === 0 ? (
+                <div className="flex h-full w-full items-center justify-center">
+                  {phase === "design" || phase === "design_suspended" ? (
+                    <WorkflowStepLoader step="design" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Design will appear here once generated</span>
+                  )}
                 </div>
-              )}
-              <div className="flex-1 overflow-hidden">
-                {selectedHtmlUrl ? (
-                  <iframe
-                    key={selectedScreenId}
-                    src={selectedHtmlUrl}
-                    className="h-full w-full border-none"
-                    title="Design preview"
-                    sandbox="allow-scripts allow-same-origin"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                    Select a screen
+              ) : (
+                <>
+                  {screens.length > 1 && (
+                    <div className="w-36 shrink-0 border-r overflow-y-auto bg-muted/20 py-2 px-2 flex flex-col gap-1">
+                      {screens.map((screen, i) => (
+                        <button
+                          key={screen.screenId}
+                          onClick={() => setSelectedScreenId(screen.screenId)}
+                          className={`rounded px-2 py-1.5 text-left text-xs transition-colors ${
+                            selectedScreenId === screen.screenId
+                              ? "bg-primary/10 text-primary font-medium"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          }`}
+                        >
+                          Screen {i + 1}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex-1 overflow-hidden">
+                    {selectedHtmlUrl ? (
+                      <iframe
+                        key={selectedScreenId}
+                        src={selectedHtmlUrl}
+                        className="h-full w-full border-none"
+                        title="Design preview"
+                        sandbox="allow-scripts allow-same-origin"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                        Select a screen
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </>
-          )
+                </>
+              )}
+            </div>
+            {isDesignSuspended && (
+              <DesignReviewPanel
+                projectId={projectId}
+                selectedScreenId={selectedScreenId}
+              />
+            )}
+          </>
         ) : (
-          <SandboxEditorPanel />
+          <>
+            {phase === "planning" && (
+              <div className="flex h-full w-full items-center justify-center">
+                <WorkflowStepLoader step="planning" />
+              </div>
+            )}
+            {(phase === "implementation" || phase === "completed" || phase === null) && (
+              <SandboxEditorPanel />
+            )}
+          </>
         )}
       </div>
     </div>

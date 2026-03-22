@@ -24,4 +24,7 @@ export const queryKeys = {
   designScreens: {
     list: (projectId: string) => ["design-screens", projectId] as const,
   },
+  workflowStatus: {
+    detail: (projectId: string) => ["workflow-status", projectId] as const,
+  },
 } as const;

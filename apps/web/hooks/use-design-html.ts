@@ -2,10 +2,15 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
+import { type WorkflowPhase } from "@/hooks/use-workflow-status";
 
 export type DesignScreen = { screenId: string; htmlUrl: string };
 
-export function useDesignScreens(projectId: string | null) {
+const DESIGN_PHASES: WorkflowPhase[] = ["design", "design_suspended"];
+
+export function useDesignScreens(projectId: string | null, phase: WorkflowPhase = null) {
+  const isDesignActive = DESIGN_PHASES.includes(phase);
+
   return useQuery({
     queryKey: queryKeys.designScreens.list(projectId ?? ""),
     queryFn: async () => {
@@ -16,7 +21,7 @@ export function useDesignScreens(projectId: string | null) {
       return res.json() as Promise<{ screens: DesignScreen[] }>;
     },
     enabled: !!projectId,
-    refetchInterval: 30_000,
-    staleTime: 25_000,
+    refetchInterval: isDesignActive ? 5_000 : false,
+    staleTime: 0,
   });
 }

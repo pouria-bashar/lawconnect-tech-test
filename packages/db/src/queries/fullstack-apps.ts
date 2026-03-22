@@ -36,3 +36,4 @@ export async function getStitchProjectByProjectId(
     .limit(1);
   return record;
 }
+

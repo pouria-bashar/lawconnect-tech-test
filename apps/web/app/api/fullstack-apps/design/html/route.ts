@@ -21,15 +21,15 @@ export async function GET(req: Request) {
     return NextResponse.json({ screens: [] });
   }
 
-  const [sbx, screens] = await Promise.all([
-    getSandbox(),
-    stitch.project(record.stitchProjectId).screens(),
-  ]);
-  
+  const screens = await stitch.project(record.stitchProjectId).screens().catch(() => null);
+  if (!screens?.length) {
+    return NextResponse.json({ screens: [] });
+  }
+
+  const sbx = await getSandbox();
 
   const screensWithPreview = await Promise.all(
     screens.map(async (screen) => {
-      
       const stitchHtmlUrl = await screen.getHtml();
       const htmlContent = await fetch(stitchHtmlUrl).then((r) => r.text());
       const sandboxPath = `/home/user/designs/${record.stitchProjectId}-${screen.id}.html`;
