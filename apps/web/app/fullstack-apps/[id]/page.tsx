@@ -116,14 +116,11 @@ function SplitLayout({
   );
 }
 
-type RightTab = "design" | "code";
-
 function RightPanel({
   projectId,
 }: {
   projectId: string;
 }) {
-  const [tab, setTab] = useState<RightTab>("design");
   const [selectedScreenId, setSelectedScreenId] = useState<string | null>(null);
 
   const { data: workflowData } = useWorkflowStatus(projectId);
@@ -132,45 +129,26 @@ function RightPanel({
   const screens = designData?.screens ?? [];
 
   useEffect(() => {
-    if (screens.length > 0) {
-      if (!selectedScreenId) setSelectedScreenId(screens[0]!.screenId);
-      if (tab !== "design") setTab("design");
+    if (screens.length > 0 && !selectedScreenId) {
+      setSelectedScreenId(screens[0]!.screenId);
     }
-  }, [screens.length, selectedScreenId, tab]);
-
-  useEffect(() => {
-    if ((phase === "implementation" || phase === "completed") && tab !== "code") {
-      setTab("code");
-    }
-  }, [phase, tab]);
+  }, [screens.length, selectedScreenId]);
 
   const selectedHtmlUrl = screens.find((s) => s.screenId === selectedScreenId)?.htmlUrl ?? null;
+  const isDesignPhase = phase === "design" || phase === "design_suspended";
   const isDesignSuspended = phase === "design_suspended";
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <WorkflowPhaseBar phase={phase} />
 
-      <div className="flex items-center border-b shrink-0">
-        <TabButton active={tab === "design"} onClick={() => setTab("design")}>
-          Design
-        </TabButton>
-        <TabButton active={tab === "code"} onClick={() => setTab("code")}>
-          Code
-        </TabButton>
-      </div>
-
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        {tab === "design" ? (
+        {isDesignPhase ? (
           <>
             <div className="flex flex-1 min-h-0 overflow-hidden">
               {screens.length === 0 ? (
                 <div className="flex h-full w-full items-center justify-center">
-                  {phase === "design" || phase === "design_suspended" ? (
-                    <WorkflowStepLoader step="design" />
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Design will appear here once generated</span>
-                  )}
+                  <WorkflowStepLoader step="design" />
                 </div>
               ) : (
                 <>
@@ -216,42 +194,14 @@ function RightPanel({
               />
             )}
           </>
+        ) : phase === "planning" ? (
+          <div className="flex h-full w-full items-center justify-center">
+            <WorkflowStepLoader step="planning" />
+          </div>
         ) : (
-          <>
-            {phase === "planning" && (
-              <div className="flex h-full w-full items-center justify-center">
-                <WorkflowStepLoader step="planning" />
-              </div>
-            )}
-            {(phase === "implementation" || phase === "completed" || phase === null) && (
-              <SandboxEditorPanel />
-            )}
-          </>
+          <SandboxEditorPanel />
         )}
       </div>
     </div>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-5 py-2.5 text-sm transition-colors ${
-        active
-          ? "border-b-2 border-primary font-medium text-foreground"
-          : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      {children}
-    </button>
   );
 }
