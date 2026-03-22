@@ -1,5 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { getModelFromContext } from "@/lib/model-config";
+import { designScreenTool } from "../tools/design_screen";
 import { setupProjectTool } from "../tools/setup_project";
 import { buildFullStackAppTool } from "../tools/build_full_stack_app";
 import { findFileTool } from "../tools/find_file";
@@ -19,23 +20,15 @@ You must pass this exact value as \`projectId\` when calling \`setup_project\`.
 
 ## WORKFLOW
 
-### Step 1 — Call setup_project
-As soon as the user describes what they want, call \`setup_project\` with:
-- \`projectName\`: a short name derived from their request
+### Step 1 — Call design_screen
+As soon as the user describes what they want, call \`design_screen\` with:
+- \`prompt\`: a detailed description of the UI — include the app's purpose, key screens, layout, and visual style
+- \`projectTitle\`: a short title derived from the user's request
+
+### Step 2 — Call setup_project
+Immediately after the design is generated, call \`setup_project\` with:
+- \`projectName\`: same short title as above
 - \`projectId\`: ${projectId}
-
-### Step 2 — Call build_full_stack_app
-Immediately after setup completes, call \`build_full_stack_app\` with detailed instructions covering:
-- App purpose and target user
-- Core features and user actions
-- Key screens / pages and what each contains
-- Data that needs to be stored or displayed
-- Visual style (infer from context — default to clean and modern)
-
-Infer all of this from the user's description. Do not ask for more information.
-
-### Step 3 — Report back
-After \`build_full_stack_app\` returns, briefly tell the user what was built and offer to iterate.
 
 ## RULES
 - Never ask clarifying questions
@@ -45,6 +38,7 @@ After \`build_full_stack_app\` returns, briefly tell the user what was built and
   model: ({ requestContext }) => getModelFromContext(requestContext),
   memory: sharedMemory,
   tools: {
+    design_screen: designScreenTool,
     setup_project: setupProjectTool,
     build_full_stack_app: buildFullStackAppTool,
     find_file: findFileTool,

@@ -80,6 +80,9 @@ importers:
       '@assistant-ui/react-markdown':
         specifier: ^0.12.5
         version: 0.12.5(@assistant-ui/react@0.12.16(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4)))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@google/stitch-sdk':
+        specifier: ^0.0.3
+        version: 0.0.3
       '@json-render/core':
         specifier: ^0.12.0
         version: 0.12.0(zod@4.3.6)
@@ -1537,6 +1540,10 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@google/stitch-sdk@0.0.3':
+    resolution: {integrity: sha512-lBqT4sgYUzyKdFJ8m+ITxQedI29iWhoJtRXbxGYYg1iSGoRV0dqwhyKIL7rN9QW+NoyBuIMmsjuCcoxtm8Qz4A==}
+    engines: {node: '>=18'}
 
   '@grpc/grpc-js@1.14.3':
     resolution: {integrity: sha512-Iq8QQQ/7X3Sac15oB6p0FmUg/klxQvXLeileoqrTRGJYLV+/9tubbr9ipz0GKHjmXVsgFPo/+W+2cA8eNcR+XA==}
@@ -9541,6 +9548,14 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
 
   '@floating-ui/utils@0.2.11': {}
+
+  '@google/stitch-sdk@0.0.3':
+    dependencies:
+      '@modelcontextprotocol/sdk': 1.27.1(zod@4.3.6)
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - supports-color
 
   '@grpc/grpc-js@1.14.3':
     dependencies:

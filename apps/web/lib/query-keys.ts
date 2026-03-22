@@ -21,4 +21,7 @@ export const queryKeys = {
     tree: () => ["sandbox-editor", "tree"] as const,
     file: (path: string) => ["sandbox-editor", "file", path] as const,
   },
+  designScreens: {
+    list: (projectId: string) => ["design-screens", projectId] as const,
+  },
 } as const;

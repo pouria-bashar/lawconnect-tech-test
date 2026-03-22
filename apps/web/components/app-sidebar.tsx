@@ -20,7 +20,9 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
+  useSidebar,
 } from "@workspace/ui/components/sidebar";
+import { PanelLeftIcon } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
   Avatar,
@@ -78,17 +80,20 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <span className="font-bold text-sm">LC</span>
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">LawConnect</span>
-                  <span className="truncate text-xs">Tech Test</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
+            <div className="flex items-center gap-1">
+              <SidebarMenuButton size="lg" asChild className="flex-1">
+                <Link href="/">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                    <span className="font-bold text-sm">LC</span>
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">LawConnect</span>
+                    <span className="truncate text-xs">Tech Test</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+              <SidebarToggleButton />
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -251,6 +256,20 @@ function ThreadList({
         )}
       </SidebarMenu>
     </SidebarGroup>
+  );
+}
+
+function SidebarToggleButton() {
+  const { toggleSidebar } = useSidebar();
+
+  return (
+    <button
+      onClick={toggleSidebar}
+      className="shrink-0 rounded p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+      aria-label="Toggle sidebar"
+    >
+      <PanelLeftIcon className="size-4" />
+    </button>
   );
 }
 

@@ -162,7 +162,7 @@ export function SandboxEditorPanel() {
   }, [handleSave]);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-background">
+    <div className="flex h-full flex-col overflow-hidden bg-background w-full">
       <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <h3 className="text-sm font-semibold">Editor</h3>
