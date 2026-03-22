@@ -40,8 +40,8 @@ Immediately after the design is generated, call \`setup_project\` with:
   tools: {
     design_screen: designScreenTool,
     setup_project: setupProjectTool,
-    build_full_stack_app: buildFullStackAppTool,
-    find_file: findFileTool,
-    run_command: runCommandTool,
+    // build_full_stack_app: buildFullStackAppTool,
+    // find_file: findFileTool,
+    // run_command: runCommandTool,
   },
 });
