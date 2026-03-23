@@ -167,9 +167,20 @@ function RightPanel({
 
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
         {viewingPhase === "setup" ? (
-          <div className="flex h-full w-full items-center justify-center">
-            <WorkflowStepLoader step="setup" />
-          </div>
+          phase === "setup" || phase === null ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <WorkflowStepLoader step="setup" />
+            </div>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+                <svg className="size-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                Setup complete
+              </div>
+            </div>
+          )
         ) : viewingPhase === "design" ? (
           <div className="flex flex-1 min-h-0 overflow-hidden">
             {screens.length === 0 ? (
