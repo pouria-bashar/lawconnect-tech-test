@@ -16,7 +16,8 @@ export const DesignReviewToolUI = makeAssistantToolUI<
     const projectId = result?.projectId ?? null;
     const { data: workflowData } = useWorkflowStatus(projectId);
     const phase = workflowData?.phase ?? null;
-    const { data: designData } = useDesignScreens(projectId, phase);
+    // Always treat as design_suspended — this tool only renders after design_screen completes
+    const { data: designData } = useDesignScreens(projectId, "design_suspended");
     const screens = designData?.screens ?? [];
     const [editFeedback, setEditFeedback] = useState("");
     const [variantPrompt, setVariantPrompt] = useState("");

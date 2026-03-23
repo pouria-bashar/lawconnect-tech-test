@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, use, useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import {
   useChatRuntime,
@@ -68,7 +69,7 @@ function SplitLayout({
   initialMessages?: import("ai").UIMessage[];
 }) {
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
-  const { open: sidebarOpen, setOpen: setSidebarOpen } = useChatSidebar();
+  const { open: sidebarOpen } = useChatSidebar();
 
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
@@ -147,11 +148,9 @@ function RightPanel({
   useEffect(() => {
     const active = activeViewPhase(phase);
     if (!active) return;
-    setViewingPhase(prev => {
-      const next = (prev === null || prev === lastAutoPhaseRef.current) ? active : prev;
-      lastAutoPhaseRef.current = active;
-      return next;
-    });
+    const prevAutoPhase = lastAutoPhaseRef.current; // capture before setState (avoid concurrent-mode mutation bug)
+    lastAutoPhaseRef.current = active;
+    setViewingPhase(prev => (prev === null || prev === prevAutoPhase) ? active : prev);
   }, [phase]);
 
   useEffect(() => {
@@ -228,7 +227,31 @@ function RightPanel({
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto p-6">
-              <pre className="text-xs text-foreground whitespace-pre-wrap font-mono leading-relaxed">{plan}</pre>
+              <div className="text-sm text-foreground">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <h1 className="mb-3 text-xl font-semibold">{children}</h1>,
+                    h2: ({ children }) => <h2 className="mt-5 mb-2 text-base font-semibold">{children}</h2>,
+                    h3: ({ children }) => <h3 className="mt-4 mb-1.5 text-sm font-semibold">{children}</h3>,
+                    p: ({ children }) => <p className="my-2 leading-relaxed first:mt-0 last:mb-0">{children}</p>,
+                    ul: ({ children }) => <ul className="my-2 ml-5 list-disc space-y-1">{children}</ul>,
+                    ol: ({ children }) => <ol className="my-2 ml-5 list-decimal space-y-1">{children}</ol>,
+                    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                    code: ({ children, className }) => {
+                      const isBlock = className?.startsWith("language-");
+                      return isBlock
+                        ? <code className={`block overflow-x-auto rounded-md bg-muted p-3 font-mono text-xs leading-relaxed ${className ?? ""}`}>{children}</code>
+                        : <code className="rounded border border-border/50 bg-muted/50 px-1.5 py-0.5 font-mono text-xs">{children}</code>;
+                    },
+                    pre: ({ children }) => <pre className="my-3">{children}</pre>,
+                    blockquote: ({ children }) => <blockquote className="my-2 border-l-2 border-muted-foreground/30 pl-3 italic text-muted-foreground">{children}</blockquote>,
+                    hr: () => <hr className="my-4 border-muted-foreground/20" />,
+                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                  }}
+                >
+                  {plan ?? ""}
+                </ReactMarkdown>
+              </div>
             </div>
           )
         ) : viewingPhase === "implementation" ? (
