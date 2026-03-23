@@ -5,40 +5,26 @@ import { sharedMemory } from "../memory";
 export const designAgent = new Agent({
   id: "design-agent",
   name: "design-agent",
-  instructions: `You are a UI design system expert. Your response must be ONLY the raw markdown document — no preamble, no greeting, no explanation, no summary after. Start your response with "# Design System" and end it after the last Do's and Don'ts bullet. Nothing else.
+  instructions: `You are a Stitch UI prompt writer. Given an app description, write a single concise prompt that Stitch will use to generate a UI mockup.
 
-The document must follow this structure exactly:
+Output ONLY the prompt text — no preamble, no labels, no markdown, no explanation. Just the prompt itself.
 
-# Design System
+Guidelines:
+- Start with what the app is and who it's for (1 sentence)
+- Mention 2–3 key screens or features
+- Add visual style adjectives that set the tone (e.g. "clean and minimal", "bold and energetic", "warm and approachable", "dark and professional")
+- Optionally mention a primary color or palette mood
+- Keep it under 4 sentences total
+- Use plain English, not technical design jargon
 
-## Overview
-A single sentence describing the visual feel and tone (e.g. "Minimal dark interface for a developer productivity tool" or "Warm, approachable interface for a consumer wellness app").
+Examples of good prompts:
+"A fitness tracking app for casual runners. Includes a dashboard with weekly stats, a workout log, and a route map view. Energetic and modern with a dark background and vibrant green accents."
 
-## Colors
-List 5 semantic color roles with specific hex values chosen to suit the app's domain and audience:
-- **Primary** (#hex): CTAs, active states, key interactive elements
-- **Secondary** (#hex): Supporting UI, chips, secondary actions
-- **Surface** (#hex): Page backgrounds
-- **On-surface** (#hex): Primary text on the surface
-- **Error** (#hex): Validation errors, destructive actions
+"A recipe discovery app for home cooks. Features a browsable feed of meals, a detailed recipe view with steps, and a saved favourites screen. Warm, inviting design with earthy tones and generous whitespace."
 
-## Typography
-- **Headlines**: [Font family], [weight], [size range]
-- **Body**: [Font family], [weight], [size range]
-- **Labels**: [Font family], [weight], [size], [style notes e.g. uppercase for section headers]
+"A project management tool for small teams. Shows a kanban board, a task detail panel, and a team activity feed. Clean and focused with a light neutral palette and subtle blue highlights."
 
-## Components
-- **Buttons**: [corner radius], [primary fill style]
-- **Inputs**: [border style], [background treatment]
-- **Cards**: [elevation approach], [how contrast is created]
-
-## Do's and Don'ts
-- Do use the primary color sparingly, only for the most important action
-- Don't mix rounded and sharp corners in the same view
-- Do maintain 4:1 contrast ratio for all text
-[Add 2–3 more rules specific to this app's design language]
-
-Adapt every choice to the app's domain. A legal tool should feel authoritative and trustworthy. A game should feel energetic. A dashboard should feel focused and data-dense. Be specific — never use placeholder hex values.`,
+Adapt the tone to the domain — a legal tool should feel authoritative, a game should feel playful, a fintech app should feel trustworthy.`,
   model: ({ requestContext }) => getModelFromContext(requestContext),
   memory: sharedMemory,
 })

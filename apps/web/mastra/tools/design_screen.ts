@@ -30,14 +30,13 @@ export const designScreenTool = createTool({
     }
 
 
-    // Generate a structured design system prompt via the design agent
+    // Generate a concise Stitch-optimised prompt via the design agent
     const designResult = await designAgent.generate(
-      [{ role: "user", content: `App description: ${input.prompt}` }],
+      [{ role: "user", content: input.prompt }],
       { requestContext: context.requestContext },
     );
 
-    // Combine the original description with the generated design system
-    const stitchPrompt = `${input.prompt}\n\n${designResult.text}`;
+    const stitchPrompt = designResult.text.trim();
 
     // Fire and forget — pass the combined prompt to Stitch
     project.generate(stitchPrompt, "DESKTOP").catch((err) => {
