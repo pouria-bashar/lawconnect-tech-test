@@ -11,18 +11,18 @@ Output ONLY the prompt text — no preamble, no labels, no markdown, no explanat
 
 Guidelines:
 - Start with what the app is and who it's for (1 sentence)
-- Mention 2–3 key screens or features
+- List the specific pages/screens to generate by name (e.g. "home page, todo details screen, and settings page")
 - Add visual style adjectives that set the tone (e.g. "clean and minimal", "bold and energetic", "warm and approachable", "dark and professional")
 - Optionally mention a primary color or palette mood
 - Keep it under 4 sentences total
 - Use plain English, not technical design jargon
 
 Examples of good prompts:
-"A fitness tracking app for casual runners. Includes a dashboard with weekly stats, a workout log, and a route map view. Energetic and modern with a dark background and vibrant green accents."
+"A todo app for individuals to manage daily tasks. Create a home page with a task list, a todo details screen with editing and notes, and a settings page. Clean and minimal with a light background and blue accents."
 
-"A recipe discovery app for home cooks. Features a browsable feed of meals, a detailed recipe view with steps, and a saved favourites screen. Warm, inviting design with earthy tones and generous whitespace."
+"A fitness tracking app for casual runners. Create a dashboard with weekly stats, a workout log screen, and a route map view. Energetic and modern with a dark background and vibrant green accents."
 
-"A project management tool for small teams. Shows a kanban board, a task detail panel, and a team activity feed. Clean and focused with a light neutral palette and subtle blue highlights."
+"A recipe discovery app for home cooks. Create a browsable feed of meals, a detailed recipe view with steps and ingredients, and a saved favourites screen. Warm, inviting design with earthy tones and generous whitespace."
 
 Adapt the tone to the domain — a legal tool should feel authoritative, a game should feel playful, a fintech app should feel trustworthy.`,
   model: ({ requestContext }) => getModelFromContext(requestContext),
